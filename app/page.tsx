@@ -1,95 +1,57 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+
+import { useColorModeValue, Box, useColorMode } from '@chakra-ui/react'
+import Navigation from './sections/navigation'
+import Header from './sections/header'
+import AnimatedCursor from 'react-animated-cursor'
+import Container from './components/container'
+import Experience from './sections/experience'
+import Projects from './sections/projects'
+import React from 'react'
 
 export default function Home() {
+  const { colorMode } = useColorMode()
+
+  const [loaded, setLoaded] = React.useState(false)
+
+  React.useEffect(() => {
+    setLoaded(true)
+  }, [])
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <Box
+      minH={'100vh'}
+      bg={useColorModeValue(
+        'linear-gradient(45deg, rgba(249,252,248,1) 0%, rgba(240,240,240,1) 50%, rgba(250,250,250,1) 100%)',
+        'linear-gradient(45deg, rgba(40,41,48,1) 0%, rgba(53,54,61,1) 50%, rgba(52,53,62,1) 100%)',
+      )}
+    >
+      {loaded ? (
+        <AnimatedCursor
+          innerSize={8}
+          outerSize={40}
+          color={colorMode === 'light' ? '71,122,98' : '174,213,131'}
+          outerAlpha={0.1}
+          innerScale={1}
+          outerScale={5}
+          trailingSpeed={3}
         />
-      </div>
+      ) : (
+        <></>
+      )}
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+      <Navigation />
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+      <Container id="about" group={true}>
+        <Header />
+      </Container>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
+      <Container id="experience" group={true}>
+        <Experience />
+      </Container>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+      <Container id="projects" group={true}>
+        <Projects />
+      </Container>
+    </Box>
   )
 }
