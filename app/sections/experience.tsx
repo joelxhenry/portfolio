@@ -1,6 +1,6 @@
 import { ArrowForwardIcon } from '@chakra-ui/icons'
 import Title from '../components/title'
-import { Stack } from '@chakra-ui/react'
+import { HStack, Stack } from '@chakra-ui/react'
 import {
   Tabs,
   TabList,
@@ -23,6 +23,7 @@ interface IExperience {
   period: string
   position: string
   pointers: string[]
+  skills: string[]
 }
 
 interface ExperiencePanelProps {
@@ -32,8 +33,29 @@ interface ExperienceTabProps {
   children: React.ReactNode
 }
 
+function Skill({ skill }: { skill: string }) {
+  return (
+    <HStack
+      color={useColorModeValue('#282930', '#f9fcf8')}
+      bg={useColorModeValue('#31ac756a', '#add58375')}
+      py={'1px'}
+      px={3}
+      borderRadius={5}
+    >
+      <Box
+        textTransform={'uppercase'}
+        whiteSpace={'nowrap'}
+        fontSize={'10px'}
+        fontWeight={'bold'}
+      >
+        {skill}
+      </Box>
+    </HStack>
+  )
+}
+
 function ExperiencePanel({
-  data: { position, company, period, pointers },
+  data: { position, company, period, pointers, skills },
 }: ExperiencePanelProps) {
   return (
     <TabPanel>
@@ -68,6 +90,12 @@ function ExperiencePanel({
           {period}
         </Text>
 
+        <Flex mt={5} gap={2}>
+          {skills.map((skill, index) => (
+            <Skill skill={skill} key={index} />
+          ))}
+        </Flex>
+
         <List py={5} spacing={2}>
           {pointers.map((point, index) => (
             <ListItem key={index}>
@@ -85,10 +113,15 @@ function ExperiencePanel({
 
 function ExperienceTab({ children }: ExperienceTabProps) {
   return (
-    <Tab>
-      <Text size={'sm'} whiteSpace={'nowrap'}>
-        {children}
-      </Text>
+    <Tab
+      px={2}
+      justifyContent={'start'}
+      whiteSpace={'nowrap'}
+      textAlign={'left'}
+      fontWeight={'semibold'}
+      fontSize={'sm'}
+    >
+      {children}
     </Tab>
   )
 }
@@ -108,6 +141,15 @@ export default function Experience() {
         `Employed caching and code optimization techniques to improve API response time by an impressive 92%, enhancing overall system performance and delivering a smoother user experience.`,
         `Wrote comprehensive unit, functional, and acceptance tests using the Codeception PHP testing framework, guaranteeing the quality and stability of the developed software, and supporting efficient debugging and maintenance processes.`,
       ],
+      skills: [
+        'Php',
+        'yii',
+        '.NET C#',
+        'MySql',
+        'Codeception',
+        'GitLab',
+        'Entity Framework',
+      ],
     },
     {
       label: 'Export Academy',
@@ -119,6 +161,7 @@ export default function Experience() {
         `Exhibited strong communication skills, effectively translating technical concepts to non-technical stakeholders, ensuring clear understanding and alignment of project objectives.`,
         `Utilized full-stack development skills to implement the platform using the PHP Laravel framework, following the MVC architectural pattern, and gaining valuable insights and knowledge throughout the web development process.`,
       ],
+      skills: ['Laravel', 'Php'],
     },
   ]
 
@@ -129,6 +172,7 @@ export default function Experience() {
         <Tabs
           colorScheme={useColorModeValue('blackAlpha', 'whiteAlpha')}
           px={{ base: 0, md: 10, lg: 20 }}
+          orientation={'vertical'}
         >
           <TabList>
             {experiences.map(({ label }, index) => (

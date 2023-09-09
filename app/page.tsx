@@ -20,6 +20,7 @@ export default function Home() {
   return (
     <Box
       minH={'100vh'}
+      color={useColorModeValue('#282930', '#f9fcf8')}
       bg={useColorModeValue(
         'linear-gradient(45deg, rgba(249,252,248,1) 0%, rgba(240,240,240,1) 50%, rgba(250,250,250,1) 100%)',
         'linear-gradient(45deg, rgba(40,41,48,1) 0%, rgba(53,54,61,1) 50%, rgba(52,53,62,1) 100%)',
