@@ -1,5 +1,7 @@
 import React from 'react'
 import { Box, useColorModeValue } from '@chakra-ui/react'
+import ColorScheme from '../assets/colors'
+import FontScheme from '../assets/fonts'
 
 interface TitleProps {
   children: React.ReactNode
@@ -10,9 +12,10 @@ export default function Title({ children, size }: TitleProps) {
   return (
     <>
       <Box
-        color={useColorModeValue('#282930', '#f9fcf8')}
+        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
         fontSize={size ?? '2xl'}
         fontWeight={'bold'}
+        fontFamily={FontScheme.title}
         w={'fit-content'}
       >
         {children}
@@ -23,8 +26,8 @@ export default function Title({ children, size }: TitleProps) {
             w: '100%',
           }}
           borderBottom={useColorModeValue(
-            '4px solid #31ac74',
-            '4px solid #aed583',
+            `4px solid ${ColorScheme.light.primary}`,
+            `4px solid ${ColorScheme.dark.primary}`,
           )}
         ></Box>
       </Box>

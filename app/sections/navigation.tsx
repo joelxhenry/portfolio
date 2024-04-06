@@ -10,6 +10,7 @@ import {
   HStack,
 } from '@chakra-ui/react'
 import { MoonIcon, SunIcon } from '@chakra-ui/icons'
+import ColorScheme from '../assets/colors'
 
 interface NavLinkProps {
   children?: React.ReactNode
@@ -22,15 +23,18 @@ interface NavButtonProps {
   link?: string
 }
 
-function NavLink(props: NavLinkProps) {
+export function NavLink(props: NavLinkProps) {
   const { children, link } = props
   return (
     <>
       <Box
-        color={useColorModeValue('#282930', '#f9fcf8')}
+        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
         transition={'.25s ease'}
         _hover={{
-          color: useColorModeValue('#31ac74', '#aed583'),
+          color: useColorModeValue(
+            ColorScheme.light.primary,
+            ColorScheme.dark.primary,
+          ),
         }}
         fontWeight={'bold'}
         as="a"
@@ -42,14 +46,20 @@ function NavLink(props: NavLinkProps) {
   )
 }
 
-function NavButton(props: NavButtonProps) {
+export function NavButton(props: NavButtonProps) {
   const { event, children, link } = props
   return (
     <>
       <Button
         _hover={{
-          bg: useColorModeValue('#31ac74', '#aed583'),
-          color: useColorModeValue('#f9fcf8', '#282930'),
+          bg: useColorModeValue(
+            ColorScheme.light.primary,
+            ColorScheme.dark.primary,
+          ),
+          color: useColorModeValue(
+            ColorScheme.dark.text,
+            ColorScheme.light.text,
+          ),
         }}
         borderRadius={'full'}
         px={10}
@@ -67,7 +77,7 @@ function NavDivider() {
   return (
     <>
       <Box
-        color={useColorModeValue('#282930', '#f9fcf8')}
+        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
         mr={4}
         fontWeight={'bold'}
       >

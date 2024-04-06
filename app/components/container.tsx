@@ -8,8 +8,8 @@ interface ContainerProps {
 
 export default function Container({ children, id, group }: ContainerProps) {
   let props: { [key: string]: any } = {
-    py: 10,
-    px: { base: 10, md: 40, lg: 60 },
+    py: 5,
+    px: { base: 10, md: 40, lg: 40 },
   }
 
   if (id) props = { id, ...props }

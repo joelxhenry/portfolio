@@ -2,12 +2,18 @@
 
 import { useColorModeValue, Box, useColorMode } from '@chakra-ui/react'
 import Navigation from './sections/navigation'
-import Header from './sections/header'
+import Header, { Content } from './sections/header'
 import AnimatedCursor from 'react-animated-cursor'
 import Container from './components/container'
 import Experience from './sections/experience'
 import Projects from './sections/projects'
 import React from 'react'
+import ColorScheme from './assets/colors'
+import FontSchema from './assets/fonts'
+import hexRgb from 'hex-rgb'
+import Title from './components/title'
+import AboutMe from './sections/about'
+import Skills from './sections/skills'
 
 export default function Home() {
   const { colorMode } = useColorMode()
@@ -20,17 +26,24 @@ export default function Home() {
   return (
     <Box
       minH={'100vh'}
-      color={useColorModeValue('#282930', '#f9fcf8')}
-      bg={useColorModeValue(
-        'linear-gradient(45deg, rgba(249,252,248,1) 0%, rgba(240,240,240,1) 50%, rgba(250,250,250,1) 100%)',
-        'linear-gradient(45deg, rgba(40,41,48,1) 0%, rgba(53,54,61,1) 50%, rgba(52,53,62,1) 100%)',
-      )}
+      fontFamily={FontSchema.body}
+      color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
+      bg={useColorModeValue(ColorScheme.light.main, ColorScheme.dark.main)}
+      bgAttachment={'fixed'}
     >
       {loaded ? (
         <AnimatedCursor
           innerSize={8}
           outerSize={40}
-          color={colorMode === 'light' ? '71,122,98' : '174,213,131'}
+          color={
+            colorMode === 'light'
+              ? hexRgb(ColorScheme.light.primary, { format: 'array' })
+                  .slice(0, -1)
+                  .join(', ')
+              : hexRgb(ColorScheme.dark.primary, { format: 'array' })
+                  .slice(0, -1)
+                  .join(', ')
+          }
           outerAlpha={0.1}
           innerScale={1}
           outerScale={5}
@@ -42,8 +55,12 @@ export default function Home() {
 
       <Navigation />
 
-      <Container id="about" group={true}>
+      <Container group={true}>
         <Header />
+      </Container>
+
+      <Container id="about" group={true}>
+        <AboutMe />
       </Container>
 
       <Container id="experience" group={true}>
@@ -53,6 +70,8 @@ export default function Home() {
       <Container id="projects" group={true}>
         <Projects />
       </Container>
+
+      <Skills />
     </Box>
   )
 }
