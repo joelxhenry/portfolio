@@ -11,8 +11,8 @@ import {
   useColorModeValue,
   Image,
 } from '@chakra-ui/react'
-import { NavButton, NavLink } from './navigation'
-import { ArrowLeftIcon, ArrowDownIcon } from '@chakra-ui/icons'
+import { NavLink } from './navigation'
+import { ArrowDownIcon } from '@chakra-ui/icons'
 
 interface ContentProps {
   children: React.ReactNode
@@ -22,7 +22,7 @@ export function Content({ children }: ContentProps) {
   return (
     <Text
       fontWeight={'medium'}
-      opacity={0.6}
+      opacity={0.8}
       fontSize={'16px'}
       fontFamily={FontScheme.body}
     >

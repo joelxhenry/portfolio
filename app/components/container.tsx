@@ -1,19 +1,19 @@
-import { Box } from '@chakra-ui/react'
+import { Box } from "@chakra-ui/react";
 
 interface ContainerProps {
-  children: React.ReactNode
-  id?: string
-  group?: boolean
+  children: React.ReactNode;
+  id?: string;
+  group?: boolean;
 }
 
 export default function Container({ children, id, group }: ContainerProps) {
   let props: { [key: string]: any } = {
     py: 5,
-    px: { base: 10, md: 40, lg: 40 },
-  }
+    px: { base: 10, md: 20, xl: 80 },
+  };
 
-  if (id) props = { id, ...props }
-  if (group) props = { 'data-group': true, ...props }
+  if (id) props = { id, ...props };
+  if (group) props = { "data-group": true, ...props };
 
-  return <Box {...props}>{children}</Box>
+  return <Box display={'flex'} flexDir={'column'} justifyContent={'center'} minHeight={'60vh'} {...props}>{children}</Box>;
 }

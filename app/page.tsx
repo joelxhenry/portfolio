@@ -1,48 +1,46 @@
-'use client'
+"use client";
 
-import { useColorModeValue, Box, useColorMode } from '@chakra-ui/react'
-import Navigation from './sections/navigation'
-import Header, { Content } from './sections/header'
-import AnimatedCursor from 'react-animated-cursor'
-import Container from './components/container'
-import Experience from './sections/experience'
-import Projects from './sections/projects'
-import React from 'react'
-import ColorScheme from './assets/colors'
-import FontSchema from './assets/fonts'
-import hexRgb from 'hex-rgb'
-import Title from './components/title'
-import AboutMe from './sections/about'
-import Skills from './sections/skills'
+import { useColorModeValue, Box, useColorMode } from "@chakra-ui/react";
+import Navigation from "./sections/navigation";
+import Header, { Content } from "./sections/header";
+import AnimatedCursor from "react-animated-cursor";
+import Container from "./components/container";
+import Projects from "./sections/projects";
+import React from "react";
+import ColorScheme from "./assets/colors";
+import FontSchema from "./assets/fonts";
+import hexRgb from "hex-rgb";
+import AboutMe from "./sections/about";
+import Skills from "./sections/skills";
 
 export default function Home() {
-  const { colorMode } = useColorMode()
+  const { colorMode } = useColorMode();
 
-  const [loaded, setLoaded] = React.useState(false)
+  const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
-    setLoaded(true)
-  }, [])
+    setLoaded(true);
+  }, []);
   return (
     <Box
-      minH={'100vh'}
+      minH={"100vh"}
       fontFamily={FontSchema.body}
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
       bg={useColorModeValue(ColorScheme.light.main, ColorScheme.dark.main)}
-      bgAttachment={'fixed'}
+      bgAttachment={"fixed"}
     >
       {loaded ? (
         <AnimatedCursor
           innerSize={8}
           outerSize={40}
           color={
-            colorMode === 'light'
-              ? hexRgb(ColorScheme.light.primary, { format: 'array' })
+            colorMode === "light"
+              ? hexRgb(ColorScheme.light.primary, { format: "array" })
                   .slice(0, -1)
-                  .join(', ')
-              : hexRgb(ColorScheme.dark.primary, { format: 'array' })
+                  .join(", ")
+              : hexRgb(ColorScheme.dark.primary, { format: "array" })
                   .slice(0, -1)
-                  .join(', ')
+                  .join(", ")
           }
           outerAlpha={0.1}
           innerScale={1}
@@ -58,20 +56,40 @@ export default function Home() {
       <Container group={true}>
         <Header />
       </Container>
+      <Skills />
 
-      <Container id="about" group={true}>
-        <AboutMe />
-      </Container>
-
-      <Container id="experience" group={true}>
-        <Experience />
-      </Container>
+      <Box
+        bgImage={"/bg.jpg"}
+        bgPosition={"center"}
+        bgSize={"cover"}
+        bgAttachment={"fixed"}
+        position={"relative"}
+      >
+        <Box
+          position={"absolute"}
+          top={0}
+          bottom={0}
+          left={0}
+          right={0}
+          opacity={"70%"}
+          bg={colorMode == "light" ? ColorScheme.light.bg : ColorScheme.dark.bg}
+        />
+        <Box position={'relative'}>
+          <Container id="about" group={true}>
+            <AboutMe />
+          </Container>
+        </Box>
+      </Box>
 
       <Container id="projects" group={true}>
-        <Projects />
+        <Box py={10}>
+          <Projects />
+        </Box>
       </Container>
 
-      <Skills />
+      {/* <Container id="experience" group={true}>
+        <Experience />
+      </Container> */}
     </Box>
-  )
+  );
 }

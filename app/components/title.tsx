@@ -1,11 +1,11 @@
-import React from 'react'
-import { Box, useColorModeValue } from '@chakra-ui/react'
-import ColorScheme from '../assets/colors'
-import FontScheme from '../assets/fonts'
+import React from "react";
+import { Box, useColorModeValue } from "@chakra-ui/react";
+import ColorScheme from "../assets/colors";
+import FontScheme from "../assets/fonts";
 
 interface TitleProps {
-  children: React.ReactNode
-  size?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl'
+  children: React.ReactNode;
+  size?: "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl";
 }
 
 export default function Title({ children, size }: TitleProps) {
@@ -13,24 +13,25 @@ export default function Title({ children, size }: TitleProps) {
     <>
       <Box
         color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-        fontSize={size ?? '2xl'}
-        fontWeight={'bold'}
+        fontSize={size ?? "4xl"}
+        fontWeight={"bold"}
+        zIndex={9999}
         fontFamily={FontScheme.title}
-        w={'fit-content'}
+        w={"fit-content"}
       >
         {children}
         <Box
-          w={'25%'}
-          transition={'.5s ease'}
+          w={"25%"}
+          transition={".5s ease"}
           _groupHover={{
-            w: '100%',
+            w: "100%",
           }}
           borderBottom={useColorModeValue(
             `4px solid ${ColorScheme.light.primary}`,
-            `4px solid ${ColorScheme.dark.primary}`,
+            `4px solid ${ColorScheme.dark.primary}`
           )}
         ></Box>
       </Box>
     </>
-  )
+  );
 }

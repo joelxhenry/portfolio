@@ -1,5 +1,5 @@
-import { Search2Icon, SearchIcon } from '@chakra-ui/icons'
-import Title from '../components/title'
+import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
+import Title from "../components/title";
 import {
   Box,
   Grid,
@@ -18,142 +18,168 @@ import {
   List,
   ListItem,
   ListIcon,
-} from '@chakra-ui/react'
-import Skills from './skills'
-import projects, { ProjectInterface } from '../content/projects'
-import ColorScheme from '../assets/colors'
-import { Content } from './header'
-import Slider from 'react-slick'
-import { ArrowRight, Code, PlayOne } from '@icon-park/react'
+  SimpleGrid,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  useBreakpointValue,
+  PlacementWithLogical,
+  Text,
+  VStack,
+  useColorMode,
+} from "@chakra-ui/react";
+import projects, { ProjectInterface } from "../content/projects";
+import ColorScheme from "../assets/colors";
+import { Content } from "./header";
+import { ArrowRight, Code, PlayOne } from "@icon-park/react";
 
 function SearchInput() {
   return (
     <>
-      <InputGroup borderRadius={'full'}>
-        <Input borderRadius={'full'} type="search" />
-        <InputRightAddon borderRightRadius={'full'}>
+      <InputGroup borderRadius={"full"}>
+        <Input borderRadius={"full"} type="search" />
+        <InputRightAddon borderRightRadius={"full"}>
           <SearchIcon />
         </InputRightAddon>
       </InputGroup>
     </>
-  )
+  );
 }
 
 function Project({ project }: { project: ProjectInterface }) {
+  const placement = useBreakpointValue<PlacementWithLogical>({
+    base: "bottom",
+    lg: "right",
+  });
+  const { colorMode } = useColorMode();
+
   return (
     <Card
-      shadow={'md'}
-      h={'full'}
+      shadow={"none"}
+      h={"full"}
       rounded={10}
-      bg={useColorModeValue('whiteAlpha.400', 'blackAlpha.400')}
-      backdropBlur={'md'}
-      border={`0.5px solid ${useColorModeValue(
-        ColorScheme.light.primary,
-        ColorScheme.dark.primary,
-      )}`}
+      bg={useColorModeValue("whiteAlpha.400", "blackAlpha.400")}
+      backdropBlur={"md"}
     >
-      <CardBody>
-        <Grid alignItems={'center'} templateColumns={'repeat(12,1fr)'} gap={10}>
-          <GridItem colSpan={{ base: 12, md: 4, lg: 5 }}>
-            <Image
-              shadow={'md'}
+      <Popover trigger="hover" placement={placement}>
+        <PopoverTrigger>
+          <Box
+            data-group={true}
+            display={"flex"}
+            flexDirection={"column"}
+            justifyContent={"space-between"}
+            gap={2}
+          >
+            <Box
+              position={"relative"}
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"center"}
+              aspectRatio={1}
+              overflow={"hidden"}
+              width={"full"}
+              shadow={"md"}
               rounded={10}
-              src={project.image}
-              alt={project.title}
-            />
-          </GridItem>
-          <GridItem colSpan={{ base: 12, md: 8, lg: 7 }}>
-            <Heading mb={10} fontSize={'lg'}>
+            >
+              <Image width={"full"} src={project.image} alt={project.title} />
+
               <Box
-                as="span"
-                position={'relative'}
-                color={useColorModeValue(
-                  ColorScheme.light.primary,
-                  ColorScheme.dark.primary,
-                )}
+                position={"absolute"}
+                display={"flex"}
+                alignItems={"center"}
+                justifyContent={"center"}
+                top={-1}
+                bottom={-1}
+                left={-1}
+                right={-1}
+                transition={".25s ease"}
+                bg={
+                  colorMode === "light"
+                    ? ColorScheme.light.bg
+                    : ColorScheme.dark.bg
+                }
+                opacity={0}
+                _hover={{
+                  opacity: 1,
+                }}
               >
-                {project.title}
-                <Box
-                  position={'absolute'}
-                  borderBottom={useColorModeValue(
-                    `2px solid ${ColorScheme.light.primary}`,
-                    `2px solid ${ColorScheme.dark.primary}`,
-                  )}
-                  bottom={0}
-                  left={'100%'}
-                  right={0}
-                  transition={'.5s'}
-                  _groupHover={{
-                    left: '25%',
-                  }}
-                ></Box>
+                <VStack
+                  marginTop={10}
+                  justifyContent={{ base: "center", md: "end" }}
+                  gap={5}
+                >
+                  <Button
+                    href={project.source_code_link}
+                    as={"a"}
+                    target="_blank"
+                    rounded={0}
+                    size={"sm"}
+                    variant={"ghost"}
+                    w="full"
+                  >
+                    Source Code
+                    <Box pl={2} as="span">
+                      {" "}
+                      <Code />
+                    </Box>
+                  </Button>
+                  <Button
+                    href={project.preview_link}
+                    target="_blank"
+                    as={"a"}
+                    w="full"
+                    rounded={0}
+                    size={"sm"}
+                    textAlign={"end"}
+                  >
+                    Preview{" "}
+                    <Box pl={2} as="span">
+                      {" "}
+                      <PlayOne />
+                    </Box>
+                  </Button>
+                </VStack>
               </Box>
-            </Heading>
-
-            <Box mb={5}>
-              <Heading fontSize={'md'} mb={2}>
-                Overview
-              </Heading>
-              <Content>{project.description}</Content>
             </Box>
-          </GridItem>
-        </Grid>
+          </Box>
+        </PopoverTrigger>
 
-        <Box my={2}>
-          <Heading fontSize={'md'} mb={2}>
-            Tools
+        <PopoverContent p={5}>
+          <Heading textAlign={"center"} mb={3} fontSize={"lg"}>
+            <Box
+              as="span"
+              position={"relative"}
+              color={useColorModeValue(
+                ColorScheme.light.primary,
+                ColorScheme.dark.primary
+              )}
+            >
+              {project.title}
+            </Box>
           </Heading>
-          <List>
-            {project.stack.map((tool, i) => (
-              <HStack gap={2} key={i}>
-                <ListIcon as={() => <ArrowRight />} />
-                <Box>{tool}</Box>
-              </HStack>
-            ))}
-          </List>
-        </Box>
-
-        <HStack justifyContent={'end'} gap={5}>
-          <Button
-            href={project.source_code_link}
-            as={'a'}
-            target="_blank"
-            rounded={0}
-            size={'sm'}
-          >
-            Source Code
-            <Box pl={2} as="span">
-              {' '}
-              <Code />
-            </Box>
-          </Button>
-          <Button
-            href={project.preview_link}
-            target="_blank"
-            as={'a'}
-            bg={useColorModeValue(
-              ColorScheme.light.primary,
-              ColorScheme.dark.primary,
-            )}
-            color={useColorModeValue(
-              ColorScheme.dark.text,
-              ColorScheme.light.text,
-            )}
-            w={'50%'}
-            rounded={0}
-            size={'sm'}
-            textAlign={'end'}
-          >
-            Preview{' '}
-            <Box pl={2} as="span">
-              {' '}
-              <PlayOne />
-            </Box>
-          </Button>
-        </HStack>
-      </CardBody>
+          <Box mb={5}>
+            <Heading fontSize={"md"} mb={2}>
+              Overview
+            </Heading>
+            <Content>{project.description}</Content>
+          </Box>
+          <Box my={2}>
+            <Heading fontSize={"md"} mb={2}>
+              Tools
+            </Heading>
+            <List>
+              {project.stack.map((tool, i) => (
+                <HStack gap={2} key={i}>
+                  <ListIcon as={() => <ArrowRight />} />
+                  <Box>{tool}</Box>
+                </HStack>
+              ))}
+            </List>
+          </Box>
+        </PopoverContent>
+      </Popover>
     </Card>
-  )
+  );
 }
 
 export default function Projects() {
@@ -161,22 +187,11 @@ export default function Projects() {
     <Box>
       <Title>my projects.</Title>
 
-      <Grid py={10} templateColumns={'repeat(12,1fr)'}>
-        <GridItem colSpan={{ base: 12, lg: 4 }}>
-          <SearchInput />
-        </GridItem>
-        <GridItem colSpan={{ base: 12, lg: 8 }} px={10}>
-          <Slider
-            {...{
-              fade: true,
-            }}
-          >
-            {projects.map((project, _i) => (
-              <Project project={project} key={_i} />
-            ))}
-          </Slider>
-        </GridItem>
-      </Grid>
+      <SimpleGrid mt={10} columns={{ base: 2, md: 3, lg: 4 }} spacing={5}>
+        {projects.map((project, _i) => (
+          <Project project={project} key={_i} />
+        ))}
+      </SimpleGrid>
     </Box>
-  )
+  );
 }

@@ -4,6 +4,7 @@ export interface ColorInterface {
   main: string;
   accent: string;
   text: string;
+  bg: string;
 }
 
 export interface ColorSchemeInterface {
@@ -17,6 +18,7 @@ const DarkScheme: ColorInterface = {
   main: "linear-gradient(22deg, rgba(15,55,94,1) 0%, rgba(13,31,62,1) 45%, rgba(10,39,55,1) 100%)",
   accent: "",
   text: "#f9fcf8",
+  bg: 'rgba(15,55,94,1)'
 };
 
 const LightScheme: ColorInterface = {
@@ -25,6 +27,7 @@ const LightScheme: ColorInterface = {
   main: "linear-gradient(22deg, rgba(241,248,255,1) 0%, rgba(255,255,255,1) 45%, rgba(248,253,255,1) 100%)",
   accent: "",
   text: "#282930",
+  bg:'rgba(241,248,255,1)'
 };
 
 const ColorScheme: ColorSchemeInterface = {

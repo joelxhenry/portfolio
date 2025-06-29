@@ -1,6 +1,6 @@
-import { ArrowForwardIcon } from '@chakra-ui/icons'
-import Title from '../components/title'
-import { HStack, Stack } from '@chakra-ui/react'
+import { ArrowForwardIcon } from "@chakra-ui/icons";
+import Title from "../components/title";
+import { HStack, Stack } from "@chakra-ui/react";
 import {
   Tabs,
   TabList,
@@ -15,15 +15,15 @@ import {
   List,
   ListItem,
   ListIcon,
-} from '@chakra-ui/react'
-import ColorScheme from '../assets/colors'
-import experiences, { ExperienceInterface } from '../content/experience'
+} from "@chakra-ui/react";
+import ColorScheme from "../assets/colors";
+import experiences, { ExperienceInterface } from "../content/experience";
 
 interface ExperiencePanelProps {
-  data: ExperienceInterface
+  data: ExperienceInterface;
 }
 interface ExperienceTabProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 function Skill({ skill }: { skill: string }) {
@@ -32,22 +32,22 @@ function Skill({ skill }: { skill: string }) {
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
       bg={useColorModeValue(
         ColorScheme.light.secondary,
-        ColorScheme.dark.secondary,
+        ColorScheme.dark.secondary
       )}
-      py={'1px'}
+      py={"1px"}
       px={3}
-      borderRadius={'full'}
+      borderRadius={"full"}
     >
       <Box
-        textTransform={'uppercase'}
-        whiteSpace={'nowrap'}
-        fontSize={'10px'}
-        fontWeight={'bold'}
+        textTransform={"uppercase"}
+        whiteSpace={"nowrap"}
+        fontSize={"10px"}
+        fontWeight={"bold"}
       >
         {skill}
       </Box>
     </HStack>
-  )
+  );
 }
 
 function ExperiencePanel({
@@ -56,36 +56,36 @@ function ExperiencePanel({
   return (
     <TabPanel>
       <Box data-group>
-        <Flex alignItems={'center'} gap={1}>
-          <Heading fontSize={'md'}>
-            {position}{' '}
+        <Flex alignItems={"center"} gap={1}>
+          <Heading fontSize={"md"}>
+            {position}{" "}
             <Box
               as="span"
-              position={'relative'}
+              position={"relative"}
               color={useColorModeValue(
                 ColorScheme.light.primary,
-                ColorScheme.dark.primary,
+                ColorScheme.dark.primary
               )}
             >
               @ {company}
               <Box
-                position={'absolute'}
+                position={"absolute"}
                 borderBottom={useColorModeValue(
                   `2px solid ${ColorScheme.light.primary}`,
-                  `2px solid ${ColorScheme.dark.primary}`,
+                  `2px solid ${ColorScheme.dark.primary}`
                 )}
                 bottom={0}
-                left={'100%'}
+                left={"100%"}
                 right={0}
-                transition={'.5s'}
+                transition={".5s"}
                 _groupHover={{
-                  left: '25%',
+                  left: "25%",
                 }}
               ></Box>
             </Box>
           </Heading>
         </Flex>
-        <Text opacity={0.5} fontSize={'xs'}>
+        <Text opacity={0.5} fontSize={"xs"}>
           {period}
         </Text>
 
@@ -95,10 +95,10 @@ function ExperiencePanel({
           ))}
         </Flex>
 
-        <List py={5} spacing={2}>
+        <List py={5} spacing={10}>
           {pointers.map((point, index) => (
             <ListItem key={index}>
-              <Stack fontSize={'sm'} direction={'row'}>
+              <Stack direction={"row"}>
                 <ListIcon mt={1} as={ArrowForwardIcon} />
                 <Text opacity={0.7}>{point}</Text>
               </Stack>
@@ -107,22 +107,22 @@ function ExperiencePanel({
         </List>
       </Box>
     </TabPanel>
-  )
+  );
 }
 
 function ExperienceTab({ children }: ExperienceTabProps) {
   return (
     <Tab
       px={2}
-      justifyContent={'start'}
-      whiteSpace={'nowrap'}
-      textAlign={'left'}
-      fontWeight={'semibold'}
-      fontSize={'sm'}
+      justifyContent={"start"}
+      whiteSpace={"nowrap"}
+      textAlign={"left"}
+      fontWeight={"semibold"}
+      fontSize={"sm"}
     >
       {children}
     </Tab>
-  )
+  );
 }
 
 export default function Experience() {
@@ -131,9 +131,9 @@ export default function Experience() {
       <Title>my experience.</Title>
       <Box py={10}>
         <Tabs
-          colorScheme={useColorModeValue('blackAlpha', 'whiteAlpha')}
-          px={{ base: 0, md: 10, lg: 20 }}
-          orientation={'vertical'}
+          colorScheme={useColorModeValue("blackAlpha", "whiteAlpha")}
+          px={{ base: 0, md: 10 }}
+          orientation={"horizontal"}
         >
           <TabList>
             {experiences.map(({ label }, index) => (
@@ -149,5 +149,5 @@ export default function Experience() {
         </Tabs>
       </Box>
     </Box>
-  )
+  );
 }

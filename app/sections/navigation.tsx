@@ -105,7 +105,6 @@ export default function Navigation() {
           <Stack alignItems={'center'} direction={'row'} spacing={7}>
             <Stack direction={'row'} spacing={5} divider={NavDivider()}>
               <NavLink link="#about">about</NavLink>
-              <NavLink link="#experience">experience</NavLink>
               <NavLink link="#projects">projects</NavLink>
             </Stack>
 
