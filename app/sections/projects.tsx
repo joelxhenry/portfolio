@@ -140,7 +140,10 @@ function Project({ project }: { project: ProjectInterface }) {
           </Box>
         </PopoverTrigger>
 
-        <PopoverContent p={5}>
+        <PopoverContent
+          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
+          p={5}
+        >
           <Heading textAlign={"center"} mb={3} fontSize={"lg"}>
             <Box
               as="span"
