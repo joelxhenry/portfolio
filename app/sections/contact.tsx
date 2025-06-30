@@ -33,19 +33,23 @@ export default function ContactForm() {
   };
 
   return (
-    <Box display={"flex"} flexDirection={"column"} gap={10}>
-      <Title>get in touch.</Title>
+    <Box display={"flex"} flexDirection={"column"} gap={10} w={"full"}>
+      <Box display={"flex"} justifyContent={"center"}>
+        <Title>get in touch.</Title>
+      </Box>
 
       <Box
         as="form"
         onSubmit={handleSubmit}
-        maxW={{ base: "full", md: "lg", lg: "md" }}
-        p={6}
+        display={"flex"}
+        justifyContent={"center"}
+        py={20}
+        w={"full"}
         borderRadius="md"
         bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
-        boxShadow="md"
+        boxShadow="lg"
       >
-        <VStack spacing={4}>
+        <VStack spacing={4} maxW={{ base: "full", md: "lg" }}>
           <FormControl isRequired>
             <FormLabel>Name</FormLabel>
             <Input

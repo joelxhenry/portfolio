@@ -25,7 +25,7 @@ export default function Skills() {
         autoplay: true,
         autoplaySpeed: 2000,
         arrows: false,
-        swipe: false,
+        swipe: true,
         speed: 3000,
       }}
     >

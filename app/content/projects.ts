@@ -6,8 +6,8 @@ export interface ProjectInterface {
   title: string;
   description: string;
   image: string;
-  preview_link: string;
-  source_code_link: string;
+  preview_link?: string;
+  source_code_link?: string;
   stack: string[];
 }
 
@@ -46,7 +46,6 @@ const projects: ProjectInterface[] = [
     image:
       "https://st2.depositphotos.com/19581100/47229/i/450/depositphotos_472296994-stock-photo-playing-dominoes-orange-table-domino.jpg",
     preview_link: "#",
-    source_code_link: "#",
     stack: ["Nextjs", "Python", "Typescript"],
   },
   {

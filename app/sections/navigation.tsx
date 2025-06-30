@@ -128,7 +128,6 @@ function NavDivider() {
 const SideDrawer = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const btnRef = useRef<any>();
-  const parentRef = useRef<any>();
 
   const handleClose = () => {
     onClose();
@@ -137,11 +136,6 @@ const SideDrawer = () => {
       btnRef.current?.focus({ preventScroll: true });
     });
   };
-
-  useEffect(function () {
-    if (!parentRef.current)
-      parentRef.current = document.getElementById("app-wrapper");
-  }, []);
 
   return (
     <>
@@ -160,7 +154,6 @@ const SideDrawer = () => {
         placement="left"
         onClose={onClose}
         returnFocusOnClose={false}
-        portalProps={{ containerRef: parentRef }}
       >
         <DrawerOverlay />
         <DrawerContent
@@ -194,7 +187,7 @@ export default function Navigation() {
 
   return (
     <>
-      <Box py={10} px={{ base: 10, md: 40, lg: 60 }}>
+      <Box py={10} px={{ base: 5, md: 20, xl: 40 }}>
         <Flex alignItems={"center"} justifyContent={"space-between"}>
           <Box as={"a"} href="/">
             <Image
@@ -205,7 +198,7 @@ export default function Navigation() {
           </Box>
           <Stack alignItems={"center"} direction={"row"} spacing={3}>
             <Stack
-              visibility={{ base: "hidden", lg: "visible" }}
+              display={{ base: "none", lg: "flex" }}
               direction={"row"}
               spacing={5}
               divider={NavDivider()}
@@ -215,7 +208,7 @@ export default function Navigation() {
               <NavLink link="#">blog</NavLink>
             </Stack>
 
-            <Box visibility={{ base: "hidden", lg: "visible" }}>
+            <Box display={{ base: "none", lg: "block" }}>
               <NavButton scrollTo="contact">get in touch</NavButton>
             </Box>
 
@@ -230,7 +223,7 @@ export default function Navigation() {
               {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             </Button>
 
-            <Box visibility={{ base: "visible", lg: "hidden" }}>
+            <Box display={{ base: "block", lg: "none" }}>
               <SideDrawer />
             </Box>
           </Stack>

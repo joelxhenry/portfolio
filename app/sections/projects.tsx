@@ -104,36 +104,40 @@ function Project({ project }: { project: ProjectInterface }) {
                 }}
               >
                 <VStack justifyContent={{ base: "center", md: "end" }} gap={3}>
-                  <Button
-                    href={project.source_code_link}
-                    as={"a"}
-                    target="_blank"
-                    rounded={0}
-                    size={"sm"}
-                    variant={"ghost"}
-                    w="full"
-                  >
-                    Source Code
-                    <Box pl={2} as="span">
-                      {" "}
-                      <Code />
-                    </Box>
-                  </Button>
-                  <Button
-                    href={project.preview_link}
-                    target="_blank"
-                    as={"a"}
-                    w="full"
-                    rounded={0}
-                    size={"sm"}
-                    textAlign={"end"}
-                  >
-                    Preview{" "}
-                    <Box pl={2} as="span">
-                      {" "}
-                      <PlayOne />
-                    </Box>
-                  </Button>
+                  {project.source_code_link && (
+                    <Button
+                      href={project.source_code_link}
+                      as={"a"}
+                      target="_blank"
+                      rounded={0}
+                      size={"sm"}
+                      variant={"ghost"}
+                      w="full"
+                    >
+                      Source Code
+                      <Box pl={2} as="span">
+                        {" "}
+                        <Code />
+                      </Box>
+                    </Button>
+                  )}
+                  {project.preview_link && (
+                    <Button
+                      href={project.preview_link}
+                      target="_blank"
+                      as={"a"}
+                      w="full"
+                      rounded={0}
+                      size={"sm"}
+                      textAlign={"end"}
+                    >
+                      Preview{" "}
+                      <Box pl={2} as="span">
+                        {" "}
+                        <PlayOne />
+                      </Box>
+                    </Button>
+                  )}
                 </VStack>
               </Box>
             </Box>

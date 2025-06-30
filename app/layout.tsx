@@ -6,11 +6,12 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Joel Henry | Software Developer Portfolio',
+  title: "Joel Henry | Software Developer Portfolio",
   description: `
     Discover my portfolio featuring my professional journey with various web frameworks alongside highlights from my personal projects.
   `,
-}
+  viewport: "width=device-width, initial-scale=1",
+};
 
 export default function RootLayout({
   children,

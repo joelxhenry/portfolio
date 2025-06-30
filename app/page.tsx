@@ -25,37 +25,10 @@ export default function Home() {
   }, []);
   return (
     <Box
-      minH={"100vh"}
       fontFamily={FontSchema.body}
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
       bg={useColorModeValue(ColorScheme.light.main, ColorScheme.dark.main)}
-      bgAttachment={"fixed"}
-      id="app-wrapper"
     >
-      {loaded ? (
-        <AnimatedCursor
-          innerSize={8}
-          outerSize={40}
-          color={
-            colorMode === "light"
-              ? hexRgb(ColorScheme.light.primary, { format: "array" })
-                  .slice(0, -1)
-                  .join(", ")
-              : hexRgb(ColorScheme.dark.primary, { format: "array" })
-                  .slice(0, -1)
-                  .join(", ")
-          }
-          outerAlpha={0.1}
-          innerScale={1}
-          outerScale={5}
-          trailingSpeed={3}
-          innerStyle={{ zIndex: 9999 }}
-          outerStyle={{ zIndex: 9999 }}
-        />
-      ) : (
-        <></>
-      )}
-
       <Box
         bgImage={"/bg-dark.jpg"}
         bgPosition={"center"}
@@ -120,6 +93,30 @@ export default function Home() {
       </Container>
 
       <Footer />
+
+      {loaded ? (
+        <AnimatedCursor
+          innerSize={8}
+          outerSize={40}
+          color={
+            colorMode === "light"
+              ? hexRgb(ColorScheme.light.primary, { format: "array" })
+                  .slice(0, -1)
+                  .join(", ")
+              : hexRgb(ColorScheme.dark.primary, { format: "array" })
+                  .slice(0, -1)
+                  .join(", ")
+          }
+          outerAlpha={0.1}
+          innerScale={1}
+          outerScale={5}
+          trailingSpeed={3}
+          innerStyle={{ zIndex: 9999 }}
+          outerStyle={{ zIndex: 9999 }}
+        />
+      ) : (
+        <></>
+      )}
     </Box>
   );
 }
