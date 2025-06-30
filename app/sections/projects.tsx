@@ -14,7 +14,6 @@ import {
   PopoverContent,
   useBreakpointValue,
   PlacementWithLogical,
-  useColorMode,
   Stack,
 } from "@chakra-ui/react";
 import projects, { ProjectInterface } from "../content/projects";
@@ -32,11 +31,11 @@ function Project({ project }: { project: ProjectInterface }) {
     <Stack
       flexDirection={"row"}
       spacing={3}
-      width={{ base: "full", md: "80%", lg: "75%" }}
+      width={{ base: "full", lg: "75%" }}
     >
       <Box
         position={"relative"}
-        display={"flex"}
+        display={{ base: "none", md: "flex" }}
         alignItems={"center"}
         justifyContent={"center"}
         aspectRatio={1}
@@ -114,6 +113,19 @@ function Project({ project }: { project: ProjectInterface }) {
           bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
           p={5}
         >
+          <Box
+            position={"relative"}
+            display={{ base: "flex", md: "none" }}
+            alignItems={"center"}
+            justifyContent={"center"}
+            aspectRatio={1}
+            overflow={"hidden"}
+            shadow={"md"}
+            rounded={10}
+            mb={5}
+          >
+            <Image width={"full"} src={project.image} alt={project.title} />
+          </Box>
           <Box mb={5}>
             <Heading fontSize={"md"} mb={2}>
               Overview
