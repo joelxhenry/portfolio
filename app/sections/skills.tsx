@@ -1,5 +1,4 @@
-import { Box, Image, Stack, Text, useBreakpointValue } from "@chakra-ui/react";
-import Title from "../components/title";
+import { Box, Image, useBreakpointValue } from "@chakra-ui/react";
 import Slide from "react-slick";
 import skills from "../content/skills";
 

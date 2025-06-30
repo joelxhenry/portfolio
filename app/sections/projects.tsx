@@ -1,22 +1,13 @@
-import { Search2Icon, SearchIcon } from "@chakra-ui/icons";
 import Title from "../components/title";
 import {
   Box,
-  Grid,
-  GridItem,
-  Input,
-  InputGroup,
-  InputRightAddon,
   Image,
   Heading,
   useColorModeValue,
   Card,
-  CardBody,
   HStack,
   Button,
-  Link,
   List,
-  ListItem,
   ListIcon,
   SimpleGrid,
   Popover,
@@ -24,7 +15,6 @@ import {
   PopoverContent,
   useBreakpointValue,
   PlacementWithLogical,
-  Text,
   VStack,
   useColorMode,
 } from "@chakra-ui/react";
@@ -33,18 +23,7 @@ import ColorScheme from "../assets/colors";
 import { Content } from "./header";
 import { ArrowRight, Code, PlayOne } from "@icon-park/react";
 
-function SearchInput() {
-  return (
-    <>
-      <InputGroup borderRadius={"full"}>
-        <Input borderRadius={"full"} type="search" />
-        <InputRightAddon borderRightRadius={"full"}>
-          <SearchIcon />
-        </InputRightAddon>
-      </InputGroup>
-    </>
-  );
-}
+
 
 function Project({ project }: { project: ProjectInterface }) {
   const placement = useBreakpointValue<PlacementWithLogical>({

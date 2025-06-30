@@ -18,7 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import ColorScheme from "../assets/colors";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { FaBars } from "react-icons/fa";
 
 interface NavLinkProps {
