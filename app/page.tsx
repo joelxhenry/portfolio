@@ -25,12 +25,12 @@ export default function Home() {
   }, []);
   return (
     <Box
+      className={"animated-gradient " + useColorModeValue("light", "dark")}
       fontFamily={FontSchema.body}
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-      bg={useColorModeValue(ColorScheme.light.main, ColorScheme.dark.main)}
     >
       <Box
-        bgImage={"/bg-dark.jpg"}
+        bgImage={"/bg.jpg"}
         bgPosition={"center"}
         bgSize={"cover"}
         bgAttachment={"fixed"}
@@ -42,7 +42,7 @@ export default function Home() {
           bottom={0}
           left={0}
           right={0}
-          opacity={"70%"}
+          opacity={"40%"}
           bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
         />
         <Box position={"relative"}>
@@ -61,30 +61,11 @@ export default function Home() {
 
       <Skills />
 
-      <Box
-        bgImage={"/bg.jpg"}
-        bgPosition={"center"}
-        bgSize={"cover"}
-        bgAttachment={"fixed"}
-        position={"relative"}
-      >
-        <Box
-          position={"absolute"}
-          top={0}
-          bottom={0}
-          left={0}
-          right={0}
-          opacity={"70%"}
-          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
-        />
-        <Box position={"relative"}>
-          <Container id="projects" group={true}>
-            <Box py={10}>
-              <Projects />
-            </Box>
-          </Container>
+      <Container id="projects" group={true}>
+        <Box py={10}>
+          <Projects />
         </Box>
-      </Box>
+      </Container>
 
       <Container id="contact" group={true}>
         <Box py={10}>

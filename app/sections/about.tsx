@@ -1,10 +1,10 @@
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, Stack } from "@chakra-ui/react";
 import Title from "../components/title";
 import { Content } from "./header";
 
 export default function AboutMe() {
   return (
-    <Box>
+    <Stack alignItems={'center'} textAlign={'center'}>
       <Title>about me.</Title>
       <Box py={10}>
         <Content>
@@ -14,9 +14,9 @@ export default function AboutMe() {
         <Content>{`Explore my portfolio to see how my skills can benefit your projects. I'm always open to new opportunities and challenges. Let's create something extraordinary together.`}</Content>
       </Box>
 
-      <Button rounded={0} size={"sm"} textAlign={"end"}>
+      <Button rounded={0} textAlign={"end"}>
         Download Resume
       </Button>
-    </Box>
+    </Stack>
   );
 }

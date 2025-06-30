@@ -15,5 +15,5 @@ export default function Container({ children, id, group }: ContainerProps) {
   if (id) props = { id, ...props };
   if (group) props = { "data-group": true, ...props };
 
-  return <Box display={'flex'} flexDir={'column'} justifyContent={'center'} minHeight={'60vh'} {...props}>{children}</Box>;
+  return <Box display={'flex'} flexDir={'column'} justifyContent={'center'} minHeight={'70vh'} {...props}>{children}</Box>;
 }

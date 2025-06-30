@@ -4,6 +4,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Stack,
   Textarea,
   useColorModeValue,
   VStack,
@@ -33,7 +34,7 @@ export default function ContactForm() {
   };
 
   return (
-    <Box display={"flex"} flexDirection={"column"} gap={10} w={"full"}>
+    <Stack spacing={10} w={"full"}>
       <Box display={"flex"} justifyContent={"center"}>
         <Title>get in touch.</Title>
       </Box>
@@ -88,6 +89,6 @@ export default function ContactForm() {
           </Button>
         </VStack>
       </Box>
-    </Box>
+    </Stack>
   );
 }

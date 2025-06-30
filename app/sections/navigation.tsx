@@ -196,7 +196,7 @@ export default function Navigation() {
               alt={colorMode === "light" ? "Light Logo" : "Dark Logo"}
             />
           </Box>
-          <Stack alignItems={"center"} direction={"row"} spacing={3}>
+          <Stack alignItems={"center"} direction={"row"} spacing={5}>
             <Stack
               display={{ base: "none", lg: "flex" }}
               direction={"row"}
