@@ -5,7 +5,7 @@ import skills from "../content/skills";
 
 export default function Skills() {
   const slidesToShow = useBreakpointValue({
-    base: 4,
+    base: 3,
     md: 7,
     lg: 10,
   });
