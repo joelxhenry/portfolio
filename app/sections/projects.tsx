@@ -27,6 +27,11 @@ function Project({ project }: { project: ProjectInterface }) {
     lg: "right",
   });
 
+  const trigger = useBreakpointValue<any>({
+    base: undefined,
+    lg: "hover",
+  });
+
   return (
     <Stack
       flexDirection={"row"}
@@ -46,7 +51,7 @@ function Project({ project }: { project: ProjectInterface }) {
       >
         <Image width={"full"} src={project.image} alt={project.title} />
       </Box>
-      <Popover trigger="hover" placement={placement}>
+      <Popover trigger={trigger} placement={placement}>
         <PopoverTrigger>
           <Stack
             w={"full"}
