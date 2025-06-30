@@ -1,13 +1,13 @@
-import './globals.css'
-import './styles/app.scss'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { Providers } from './providers'
+import "./globals.css";
+import "./styles/app.scss";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Joel Henry | Software Developer Portfolio",
+  title: "Joel's Portfolio | Software Developer",
   description: `
     Discover my portfolio featuring my professional journey with various web frameworks alongside highlights from my personal projects.
   `,
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
@@ -25,5 +25,5 @@ export default function RootLayout({
         <Providers>{children}</Providers>
       </body>
     </html>
-  )
+  );
 }
