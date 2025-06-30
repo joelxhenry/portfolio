@@ -103,11 +103,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   opacity: 1,
                 }}
               >
-                <VStack
-                  marginTop={10}
-                  justifyContent={{ base: "center", md: "end" }}
-                  gap={5}
-                >
+                <VStack justifyContent={{ base: "center", md: "end" }} gap={3}>
                   <Button
                     href={project.source_code_link}
                     as={"a"}

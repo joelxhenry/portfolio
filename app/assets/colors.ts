@@ -16,7 +16,7 @@ const DarkScheme: ColorInterface = {
   primary: "#7FC7D9",
   secondary: "#add58375",
   main: "linear-gradient(22deg, rgba(15,55,94,1) 0%, rgba(13,31,62,1) 45%, rgba(10,39,55,1) 100%)",
-  accent: "",
+  accent: "#57adbf",
   text: "#f9fcf8",
   bg: 'rgba(15,55,94,1)'
 };
@@ -25,7 +25,7 @@ const LightScheme: ColorInterface = {
   primary: "#365486",
   secondary: "#31ac756a",
   main: "linear-gradient(22deg, rgba(241,248,255,1) 0%, rgba(255,255,255,1) 45%, rgba(248,253,255,1) 100%)",
-  accent: "",
+  accent: "#57adbf",
   text: "#282930",
   bg:'rgba(241,248,255,1)'
 };

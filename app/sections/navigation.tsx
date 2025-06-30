@@ -7,70 +7,108 @@ import {
   useColorModeValue,
   useDisclosure,
   Image,
-  HStack,
-} from '@chakra-ui/react'
-import { MoonIcon, SunIcon } from '@chakra-ui/icons'
-import ColorScheme from '../assets/colors'
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerBody,
+  VStack,
+  IconButton,
+  DrawerFooter,
+  Link,
+} from "@chakra-ui/react";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import ColorScheme from "../assets/colors";
+import { useEffect, useRef } from "react";
+import { FaBars } from "react-icons/fa";
 
 interface NavLinkProps {
-  children?: React.ReactNode
-  link?: string
+  children?: React.ReactNode;
+  link?: string;
+  scrollTo?: string;
+  event?: () => any;
 }
 
 interface NavButtonProps {
-  children?: React.ReactNode
-  event?: () => any
-  link?: string
+  children?: React.ReactNode;
+  event?: () => any;
+  link?: string;
+  scrollTo?: string;
 }
 
 export function NavLink(props: NavLinkProps) {
-  const { children, link } = props
+  const { children, link, scrollTo, event } = props;
+
+  const handleClick = (e: any) => {
+    if (scrollTo) {
+      e.preventDefault();
+      const section = document.getElementById(scrollTo);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    if (event) event();
+  };
+
   return (
     <>
-      <Box
+      <Link
+        onClick={handleClick}
         color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-        transition={'.25s ease'}
+        transition={".25s ease"}
         _hover={{
           color: useColorModeValue(
             ColorScheme.light.primary,
-            ColorScheme.dark.primary,
+            ColorScheme.dark.primary
           ),
         }}
-        fontWeight={'bold'}
-        as="a"
-        href={link ?? '#'}
+        fontWeight={"bold"}
+        as={link ? "a" : "button"}
+        {...(link ? { href: link } : {})}
       >
         {children}
-      </Box>
+      </Link>
     </>
-  )
+  );
 }
 
 export function NavButton(props: NavButtonProps) {
-  const { event, children, link } = props
+  const { children, link, scrollTo, event } = props;
+
+  const handleClick = (e: any) => {
+    if (scrollTo) {
+      e.preventDefault();
+      const section = document.getElementById(scrollTo);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    if (event) event();
+  };
   return (
     <>
       <Button
         _hover={{
           bg: useColorModeValue(
             ColorScheme.light.primary,
-            ColorScheme.dark.primary,
+            ColorScheme.dark.primary
           ),
           color: useColorModeValue(
             ColorScheme.dark.text,
-            ColorScheme.light.text,
+            ColorScheme.light.text
           ),
         }}
-        borderRadius={'full'}
+        borderRadius={"full"}
         px={10}
-        onClick={event}
-        as={link ? 'a' : 'button'}
+        onClick={handleClick}
+        as={link ? "a" : "button"}
         {...(link ? { href: link } : {})}
       >
         {children}
       </Button>
     </>
-  )
+  );
 }
 
 function NavDivider() {
@@ -78,51 +116,126 @@ function NavDivider() {
     <>
       <Box
         color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-        mr={4}
-        fontWeight={'bold'}
+        mx={4}
+        fontWeight={"bold"}
       >
-        ,
+        {"/"}
       </Box>
     </>
-  )
+  );
 }
 
+const SideDrawer = () => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const btnRef = useRef<any>();
+  const parentRef = useRef<any>();
+
+  const handleClose = () => {
+    onClose();
+    // Prevent scroll-to-top by restoring focus without scrolling
+    requestAnimationFrame(() => {
+      btnRef.current?.focus({ preventScroll: true });
+    });
+  };
+
+  useEffect(function () {
+    if (!parentRef.current)
+      parentRef.current = document.getElementById("app-wrapper");
+  }, []);
+
+  return (
+    <>
+      {/* Trigger button */}
+      <IconButton
+        ref={btnRef}
+        onClick={onOpen}
+        aria-label="Menu"
+        icon={<FaBars />}
+        variant="ghost"
+      />
+
+      {/* Drawer */}
+      <Drawer
+        isOpen={isOpen}
+        placement="left"
+        onClose={onClose}
+        returnFocusOnClose={false}
+        portalProps={{ containerRef: parentRef }}
+      >
+        <DrawerOverlay />
+        <DrawerContent
+          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
+        >
+          <DrawerBody>
+            <VStack mt={10} align="start" spacing={5}>
+              <NavLink scrollTo="about" event={handleClose}>
+                About
+              </NavLink>
+              <NavLink scrollTo="projects" event={handleClose}>
+                Projects
+              </NavLink>
+              <NavLink link="#">Blog</NavLink>
+            </VStack>
+          </DrawerBody>
+
+          <DrawerFooter>
+            <NavButton scrollTo="contact" event={handleClose}>
+              Get In Touch
+            </NavButton>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+};
+
 export default function Navigation() {
-  const { colorMode, toggleColorMode } = useColorMode()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { colorMode, toggleColorMode } = useColorMode();
 
   return (
     <>
       <Box py={10} px={{ base: 10, md: 40, lg: 60 }}>
-        <Flex alignItems={'center'} justifyContent={'space-between'}>
-          <Box as={'a'} href="/">
+        <Flex alignItems={"center"} justifyContent={"space-between"}>
+          <Box as={"a"} href="/">
             <Image
               maxW={10}
-              src={colorMode === 'light' ? '/logo_light.png' : '/logo_dark.png'}
-              alt={colorMode === 'light' ? 'Light Logo' : 'Dark Logo'}
+              src={colorMode === "light" ? "/logo_light.png" : "/logo_dark.png"}
+              alt={colorMode === "light" ? "Light Logo" : "Dark Logo"}
             />
           </Box>
-          <Stack alignItems={'center'} direction={'row'} spacing={7}>
-            <Stack direction={'row'} spacing={5} divider={NavDivider()}>
-              <NavLink link="#about">about</NavLink>
-              <NavLink link="#projects">projects</NavLink>
+          <Stack alignItems={"center"} direction={"row"} spacing={3}>
+            <Stack
+              visibility={{ base: "hidden", lg: "visible" }}
+              direction={"row"}
+              spacing={5}
+              divider={NavDivider()}
+            >
+              <NavLink scrollTo="about">about</NavLink>
+              <NavLink scrollTo="projects">projects</NavLink>
+              <NavLink link="#">blog</NavLink>
             </Stack>
 
-            <NavButton link="#contact">get in touch</NavButton>
+            <Box visibility={{ base: "hidden", lg: "visible" }}>
+              <NavButton scrollTo="contact">get in touch</NavButton>
+            </Box>
 
             <Button
-              aspectRatio={'1/1'}
-              borderRadius={'full'}
-              size={'sm'}
-              variant={'ghost'}
+              aspectRatio={"1/1"}
+              borderRadius={"full"}
+              size={"sm"}
+              variant={"ghost"}
               onClick={toggleColorMode}
             >
-              {' '}
-              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+              {" "}
+              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
             </Button>
+
+            <Box visibility={{ base: "visible", lg: "hidden" }}>
+              <SideDrawer />
+            </Box>
           </Stack>
         </Flex>
       </Box>
     </>
-  )
+  );
 }

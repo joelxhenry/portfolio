@@ -15,7 +15,6 @@ export default function Title({ children, size }: TitleProps) {
         color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
         fontSize={size ?? "4xl"}
         fontWeight={"bold"}
-        zIndex={9999}
         fontFamily={FontScheme.title}
         w={"fit-content"}
       >

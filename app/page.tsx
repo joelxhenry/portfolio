@@ -2,7 +2,7 @@
 
 import { useColorModeValue, Box, useColorMode } from "@chakra-ui/react";
 import Navigation from "./sections/navigation";
-import Header, { Content } from "./sections/header";
+import Header from "./sections/header";
 import AnimatedCursor from "react-animated-cursor";
 import Container from "./components/container";
 import Projects from "./sections/projects";
@@ -12,6 +12,8 @@ import FontSchema from "./assets/fonts";
 import hexRgb from "hex-rgb";
 import AboutMe from "./sections/about";
 import Skills from "./sections/skills";
+import ContactForm from "./sections/contact";
+import Footer from "./sections/footer";
 
 export default function Home() {
   const { colorMode } = useColorMode();
@@ -28,6 +30,7 @@ export default function Home() {
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
       bg={useColorModeValue(ColorScheme.light.main, ColorScheme.dark.main)}
       bgAttachment={"fixed"}
+      id="app-wrapper"
     >
       {loaded ? (
         <AnimatedCursor
@@ -46,16 +49,43 @@ export default function Home() {
           innerScale={1}
           outerScale={5}
           trailingSpeed={3}
+          innerStyle={{ zIndex: 9999 }}
+          outerStyle={{ zIndex: 9999 }}
         />
       ) : (
         <></>
       )}
 
-      <Navigation />
+      <Box
+        bgImage={"/bg-dark.jpg"}
+        bgPosition={"center"}
+        bgSize={"cover"}
+        bgAttachment={"fixed"}
+        position={"relative"}
+      >
+        <Box
+          position={"absolute"}
+          top={0}
+          bottom={0}
+          left={0}
+          right={0}
+          opacity={"70%"}
+          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
+        />
+        <Box position={"relative"}>
+          <Navigation />
+          <Container group={true}>
+            <Header />
+          </Container>
+        </Box>
+      </Box>
 
-      <Container group={true}>
-        <Header />
+      <Container id="about" group={true}>
+        <Box pt={10}>
+          <AboutMe />
+        </Box>
       </Container>
+
       <Skills />
 
       <Box
@@ -72,24 +102,24 @@ export default function Home() {
           left={0}
           right={0}
           opacity={"70%"}
-          bg={colorMode == "light" ? ColorScheme.light.bg : ColorScheme.dark.bg}
+          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
         />
-        <Box position={'relative'}>
-          <Container id="about" group={true}>
-            <AboutMe />
+        <Box position={"relative"}>
+          <Container id="projects" group={true}>
+            <Box py={10}>
+              <Projects />
+            </Box>
           </Container>
         </Box>
       </Box>
 
-      <Container id="projects" group={true}>
+      <Container id="contact" group={true}>
         <Box py={10}>
-          <Projects />
+          <ContactForm />
         </Box>
       </Container>
 
-      {/* <Container id="experience" group={true}>
-        <Experience />
-      </Container> */}
+      <Footer />
     </Box>
   );
 }
