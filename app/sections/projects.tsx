@@ -190,7 +190,7 @@ export default function Projects() {
     <Box>
       <Title>my projects.</Title>
 
-      <SimpleGrid mt={10} columns={{ base: 2, md: 3, lg: 4 }} spacing={5}>
+      <SimpleGrid mt={10} columns={{ base: 1, md: 3, lg: 4 }} spacing={5}>
         {projects.map((project, _i) => (
           <Project project={project} key={_i} />
         ))}
