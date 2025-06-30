@@ -9,7 +9,7 @@ interface ContainerProps {
 export default function Container({ children, id, group }: ContainerProps) {
   let props: { [key: string]: any } = {
     py: 5,
-    px: { base: 10, md: 20, xl: 80 },
+    px: { base: 5, md: 20, xl: 80 },
   };
 
   if (id) props = { id, ...props };
