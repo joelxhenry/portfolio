@@ -61,11 +61,11 @@ export default function Home() {
 
       <Skills />
 
-      <Container id="projects" group={true}>
+      {/* <Container id="projects" group={true}>
         <Box py={10}>
           <Projects />
         </Box>
-      </Container>
+      </Container> */}
 
       <Container id="contact" group={true}>
         <Box py={10}>
