@@ -6,7 +6,7 @@ export default function AboutMe() {
   return (
     <Stack alignItems={"center"} textAlign={"center"}>
       <Title>about me.</Title>
-      <Box py={10}>
+      <Box py={10} display={"flex"} flexDirection={"column"} gap={5}>
         <Content>
           {`A tech-savvy creative based in Kingston, Jamaica 🇯🇲. With a background in full-stack software development, I’ve spent the past few years building scalable systems, contributing to cross-functional teams, and solving real-world problems with clean, efficient code.`}
         </Content>

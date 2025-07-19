@@ -35,8 +35,23 @@ export function Content({ children }: ContentProps) {
 export default function Header() {
   return (
     <>
-      <Stack h={"100%"} justifyContent={"center"} alignItems={'center'} textAlign={'center'}>
+      <Stack
+        h={"100%"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        textAlign={"center"}
+      >
         <Stack
+          padding={5}
+          borderRadius={10}
+          boxShadow={"0 0 10px rgba(0, 0, 0, 0.1)"}
+          backdropFilter={"blur(10px)"}
+          backgroundColor={useColorModeValue(
+            ColorScheme.light.bg,
+            ColorScheme.dark.bg
+          )}
+          justifyContent={"center"}
+          alignItems={"center"}
           spacing={1}
           color={useColorModeValue(
             ColorScheme.light.text,
@@ -44,8 +59,8 @@ export default function Header() {
           )}
         >
           <Title size="5xl">Joel Henry</Title>
-          <Heading opacity={0.8} fontSize={"24px"} fontWeight={"medium"}>
-            {"Software Developer"}
+          <Heading opacity={0.8} fontSize={"18px"} fontWeight={"medium"}>
+            {"DevOps Engineer | Software Developer"}
           </Heading>
         </Stack>
 
