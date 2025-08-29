@@ -8,6 +8,7 @@ import {
   Textarea,
   useColorModeValue,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import Title from "../components/title";
@@ -19,6 +20,8 @@ export default function ContactForm() {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const toast = useToast();
 
   const handleChange = (e: any) => {
     setFormData((prev) => ({
@@ -27,10 +30,43 @@ export default function ContactForm() {
     }));
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    // Send form data logic here
-    console.log("Form Submitted:", formData);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Message sent!",
+          description: "Thank you for your message. I'll get back to you soon!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        setFormData({ name: "", email: "", message: "" });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send message');
+      }
+    } catch (error) {
+      toast({
+        title: "Error sending message",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,7 +120,17 @@ export default function ContactForm() {
             />
           </FormControl>
 
-          <Button type="submit" width="full">
+          <Button 
+            type="submit" 
+            width="full"
+            isLoading={isSubmitting}
+            loadingText="Sending..."
+            bg={useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary)}
+            color="white"
+            _hover={{
+              opacity: 0.9,
+            }}
+          >
             Send Message
           </Button>
         </VStack>
