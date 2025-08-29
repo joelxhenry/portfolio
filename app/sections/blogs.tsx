@@ -10,13 +10,13 @@ import {
   HStack,
   useColorModeValue,
   Link,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import Title from "../components/title";
 import { Content } from "./header";
 import blogs, { BlogInterface } from "../content/blogs";
 import ColorScheme from "../assets/colors";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
-import Slider from "react-slick";
 
 interface BlogCardProps {
   blog: BlogInterface;
@@ -84,70 +84,16 @@ function BlogCard({ blog }: BlogCardProps) {
 export default function BlogSection() {
   const latestBlogs = blogs.slice(0, 3);
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    pauseOnHover: true,
-    arrows: true,
-    centerMode: true,
-    centerPadding: "0px",
-    responsive: [
-      {
-        breakpoint: 768,
-        settings: {
-          arrows: false,
-          centerPadding: "20px",
-        }
-      }
-    ]
-  };
 
   return (
     <Stack alignItems="center" textAlign="center" spacing={8}>
       <Title>latest blogs.</Title>
 
-      <Box py={6} width="100%" maxWidth="600px">
-        <Box
-          sx={{
-            "& .slick-dots": {
-              bottom: "-50px",
-              "& li button:before": {
-                color: useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary),
-                fontSize: "12px",
-              },
-              "& li.slick-active button:before": {
-                color: useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary),
-              }
-            },
-            "& .slick-prev, & .slick-next": {
-              "&:before": {
-                color: useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary),
-                fontSize: "20px",
-              },
-              zIndex: 1,
-            },
-            "& .slick-prev": {
-              left: "-25px",
-            },
-            "& .slick-next": {
-              right: "-25px",
-            }
-          }}
-        >
-          <Slider {...sliderSettings}>
-            {latestBlogs.map((blog, index) => (
-              <Box key={index} px={2}>
-                <BlogCard blog={blog} />
-              </Box>
-            ))}
-          </Slider>
-        </Box>
-      </Box>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6} width="100%" maxWidth="1200px">
+        {latestBlogs.map((blog, index) => (
+          <BlogCard key={index} blog={blog} />
+        ))}
+      </SimpleGrid>
 
       <Button
         as={Link}

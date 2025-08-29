@@ -11,7 +11,7 @@ export interface BlogInterface {
 const blogs: BlogInterface[] = [
   {
     title: "It's Time I Started Sharing More of My Work",
-    brief: "Explore the fundamentals of Kubernetes and how it transformed my approach to container orchestration in modern DevOps practices.",
+    brief: "For the past few years, I’ve been deep in the world of software development, building, debugging, learning, and growing. A lot of that work has lived quietly in the background: private repos, team chats, internal tools, late-night experiments that never made it out into the world.",
     slug: "sharing-my-work",
     dateAdded: "2025-10-06",
     readTime: 2,
