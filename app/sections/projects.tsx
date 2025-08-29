@@ -159,7 +159,7 @@ function Project({ project }: { project: ProjectInterface }) {
 export default function Projects() {
   return (
     <Box>
-      <Title>my projects.</Title>
+      <Title>my work.</Title>
 
       <SimpleGrid mt={10} columns={1} spacing={5}>
         {projects.map((project, _i) => (

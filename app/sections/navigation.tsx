@@ -164,10 +164,12 @@ const SideDrawer = () => {
               <NavLink scrollTo="about" event={handleClose}>
                 About
               </NavLink>
-              <NavLink scrollTo="projects" event={handleClose}>
-                Projects
+              <NavLink scrollTo="blogs" event={handleClose}>
+                Blog
               </NavLink>
-              <NavLink link="#">Blog</NavLink>
+              <NavLink scrollTo="projects" event={handleClose}>
+                My Work
+              </NavLink>
             </VStack>
           </DrawerBody>
 
@@ -204,8 +206,8 @@ export default function Navigation() {
               divider={NavDivider()}
             >
               <NavLink scrollTo="about">about</NavLink>
-              <NavLink scrollTo="projects">projects</NavLink>
-              <NavLink link="#">blog</NavLink>
+              <NavLink scrollTo="blogs">blog</NavLink>
+              <NavLink scrollTo="projects">my work</NavLink>
             </Stack>
 
             <Box display={{ base: "none", lg: "block" }}>

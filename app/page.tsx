@@ -12,6 +12,7 @@ import FontSchema from "./assets/fonts";
 import hexRgb from "hex-rgb";
 import AboutMe from "./sections/about";
 import Skills from "./sections/skills";
+import BlogSection from "./sections/blogs";
 import ContactForm from "./sections/contact";
 import Footer from "./sections/footer";
 
@@ -61,11 +62,19 @@ export default function Home() {
 
       <Skills />
 
-      {/* <Container id="projects" group={true}>
-        <Box py={10}>
+      <Container id="projects" group={true}>
+        <Box >
           <Projects />
         </Box>
-      </Container> */}
+      </Container>
+
+      <Container id="blogs" group={true}>
+        <Box>
+          <BlogSection />
+        </Box>
+      </Container>
+
+
 
       <Container id="contact" group={true}>
         <Box py={10}>
@@ -82,11 +91,11 @@ export default function Home() {
           color={
             colorMode === "light"
               ? hexRgb(ColorScheme.light.primary, { format: "array" })
-                  .slice(0, -1)
-                  .join(", ")
+                .slice(0, -1)
+                .join(", ")
               : hexRgb(ColorScheme.dark.primary, { format: "array" })
-                  .slice(0, -1)
-                  .join(", ")
+                .slice(0, -1)
+                .join(", ")
           }
           outerAlpha={0.1}
           innerScale={1}

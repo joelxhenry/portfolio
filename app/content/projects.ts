@@ -22,7 +22,7 @@ const projects: ProjectInterface[] = [
     stack: ["Laravel", "Typescript", "Vue3", "TailwindCSS"],
   },
   {
-    title: "Island Routes CMS",
+    title: "Island Routes Website",
     description: `
     Developed and maintained a centralized content management system for multiple websites,
     including Island Routes, Blue Mountain, and Mystic Mountain. The system integrates seamlessly with Resmark's tour hosting platform, enabling real-time tour bookings and secure payment processing through dedicated APIs.`,
