@@ -19,7 +19,7 @@ import {
 import projects, { ProjectInterface } from "../content/projects";
 import ColorScheme from "../assets/colors";
 import { Content } from "./header";
-import { ArrowRight, Code, PlayOne } from "@icon-park/react";
+import { ArrowRight, Code, PlayOne, DocDetail, Pen } from "@icon-park/react";
 
 function Project({ project }: { project: ProjectInterface }) {
   const placement = useBreakpointValue<PlacementWithLogical>({
@@ -122,6 +122,23 @@ function Project({ project }: { project: ProjectInterface }) {
                   <Box pl={2} as="span">
                     {" "}
                     <Code />
+                  </Box>
+                </Button>
+              )}
+
+              {project.blog_link && (
+                <Button
+                  href={project.blog_link}
+                  as={"a"}
+                  target="_blank"
+                  rounded="lg"
+                  size={"sm"}
+                  variant={"ghost"}
+                >
+                  Read Post
+                  <Box pl={2} as="span">
+                    {" "}
+                    <Pen />
                   </Box>
                 </Button>
               )}
