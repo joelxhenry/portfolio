@@ -32,6 +32,15 @@ function Project({ project }: { project: ProjectInterface }) {
     lg: "hover",
   });
 
+  const cardBg = useColorModeValue(
+    ColorScheme.light.cardBg,
+    ColorScheme.dark.cardBg
+  );
+  const cardBorder = useColorModeValue(
+    ColorScheme.light.cardBorder,
+    ColorScheme.dark.cardBorder
+  );
+
   return (
     <Stack
       flexDirection={"row"}
@@ -46,8 +55,9 @@ function Project({ project }: { project: ProjectInterface }) {
         aspectRatio={1}
         overflow={"hidden"}
         width={"25%"}
-        shadow={"md"}
-        rounded={10}
+        rounded={12}
+        border="1px solid"
+        borderColor={cardBorder}
       >
         <Image width={"full"} src={project.image} alt={project.title} />
       </Box>
@@ -57,11 +67,16 @@ function Project({ project }: { project: ProjectInterface }) {
             w={"full"}
             justifyContent={"center"}
             p={{ base: 3, md: 5 }}
-            borderRadius="md"
+            borderRadius="xl"
             _hover={{
-              shadow: "lg",
-              bg: useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg),
+              bg: cardBg,
+              borderColor: useColorModeValue(
+                ColorScheme.light.primary,
+                "rgba(200, 230, 78, 0.2)"
+              ),
             }}
+            border="1px solid"
+            borderColor="transparent"
             transition={"ease .25s"}
           >
             <Heading fontSize={{ base: "md", md: "lg" }}>
@@ -82,7 +97,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   href={project.preview_link}
                   target="_blank"
                   as={"a"}
-                  rounded={0}
+                  rounded="lg"
                   size={"sm"}
                   textAlign={"end"}
                 >
@@ -99,7 +114,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   href={project.source_code_link}
                   as={"a"}
                   target="_blank"
-                  rounded={0}
+                  rounded="lg"
                   size={"sm"}
                   variant={"ghost"}
                 >
@@ -116,6 +131,9 @@ function Project({ project }: { project: ProjectInterface }) {
 
         <PopoverContent
           bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
+          border="1px solid"
+          borderColor={cardBorder}
+          borderRadius="xl"
           p={5}
         >
           <Box
@@ -125,7 +143,6 @@ function Project({ project }: { project: ProjectInterface }) {
             justifyContent={"center"}
             aspectRatio={1}
             overflow={"hidden"}
-            shadow={"md"}
             rounded={10}
             mb={5}
           >

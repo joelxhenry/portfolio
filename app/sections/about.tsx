@@ -16,16 +16,17 @@ export default function AboutMe() {
         ))}
       </Box>
 
-      <Button 
-        rounded={0} 
+      <Button
+        borderRadius="lg"
         textAlign={"end"}
         as="a"
         href={`/${aboutContent.resumeFileName}`}
         download={aboutContent.resumeFileName}
         bg={useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary)}
-        color="white"
+        color={useColorModeValue("white", "#0a0a0a")}
+        fontWeight="medium"
         _hover={{
-          opacity: 0.9,
+          opacity: 0.85,
         }}
       >
         Download Resume

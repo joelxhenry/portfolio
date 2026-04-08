@@ -12,7 +12,6 @@ import FontSchema from "./assets/fonts";
 import hexRgb from "hex-rgb";
 import AboutMe from "./sections/about";
 import Skills from "./sections/skills";
-import BlogSection from "./sections/blogs";
 import ContactForm from "./sections/contact";
 import Footer from "./sections/footer";
 
@@ -30,29 +29,18 @@ export default function Home() {
       fontFamily={FontSchema.body}
       color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
     >
-      <Box
-        bgImage={"/bg.jpg"}
-        bgPosition={"center"}
-        bgSize={"cover"}
-        bgAttachment={"fixed"}
-        position={"relative"}
-      >
+      <Box position={"relative"}>
+        <Navigation />
         <Box
-          position={"absolute"}
-          top={0}
-          bottom={0}
-          left={0}
-          right={0}
-          opacity={"40%"}
-          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
-        />
-        <Box position={"relative"}>
-          <Navigation />
-          <Container group={true}>
-            <Header />
-          </Container>
+          py={4}
+          px={{ base: 5, md: 10, xl: 20 }}
+        >
+          <Header />
         </Box>
+
+
       </Box>
+      <Skills />
 
       <Container id="about" group={true}>
         <Box pt={10}>
@@ -60,21 +48,13 @@ export default function Home() {
         </Box>
       </Container>
 
-      <Skills />
+
 
       <Container id="projects" group={true}>
-        <Box >
+        <Box>
           <Projects />
         </Box>
       </Container>
-
-      <Container id="blogs" group={true}>
-        <Box>
-          <BlogSection />
-        </Box>
-      </Container>
-
-
 
       <Container id="contact" group={true}>
         <Box py={10}>

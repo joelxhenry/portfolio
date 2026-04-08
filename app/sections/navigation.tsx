@@ -15,6 +15,7 @@ import {
   IconButton,
   DrawerFooter,
   Link,
+  HStack,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import ColorScheme from "../assets/colors";
@@ -51,24 +52,23 @@ export function NavLink(props: NavLinkProps) {
   };
 
   return (
-    <>
-      <Link
-        onClick={handleClick}
-        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-        transition={".25s ease"}
-        _hover={{
-          color: useColorModeValue(
-            ColorScheme.light.primary,
-            ColorScheme.dark.primary
-          ),
-        }}
-        fontWeight={"bold"}
-        as={link ? "a" : "button"}
-        {...(link ? { href: link } : {})}
-      >
-        {children}
-      </Link>
-    </>
+    <Link
+      onClick={handleClick}
+      color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
+      transition={".25s ease"}
+      _hover={{
+        color: useColorModeValue(
+          ColorScheme.light.primary,
+          ColorScheme.dark.primary
+        ),
+      }}
+      fontWeight={"medium"}
+      fontSize={"sm"}
+      as={link ? "a" : "button"}
+      {...(link ? { href: link } : {})}
+    >
+      {children}
+    </Link>
   );
 }
 
@@ -87,41 +87,22 @@ export function NavButton(props: NavButtonProps) {
     if (event) event();
   };
   return (
-    <>
-      <Button
-        _hover={{
-          bg: useColorModeValue(
-            ColorScheme.light.primary,
-            ColorScheme.dark.primary
-          ),
-          color: useColorModeValue(
-            ColorScheme.dark.text,
-            ColorScheme.light.text
-          ),
-        }}
-        borderRadius={"full"}
-        px={10}
-        onClick={handleClick}
-        as={link ? "a" : "button"}
-        {...(link ? { href: link } : {})}
-      >
-        {children}
-      </Button>
-    </>
-  );
-}
-
-function NavDivider() {
-  return (
-    <>
-      <Box
-        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
-        mx={4}
-        fontWeight={"bold"}
-      >
-        {"/"}
-      </Box>
-    </>
+    <Button
+      bg={useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary)}
+      color={useColorModeValue("white", "#0a0a0a")}
+      _hover={{
+        opacity: 0.85,
+      }}
+      borderRadius={"full"}
+      px={6}
+      size={"sm"}
+      fontWeight={"medium"}
+      onClick={handleClick}
+      as={link ? "a" : "button"}
+      {...(link ? { href: link } : {})}
+    >
+      {children}
+    </Button>
   );
 }
 
@@ -131,7 +112,6 @@ const SideDrawer = () => {
 
   const handleClose = () => {
     onClose();
-    // Prevent scroll-to-top by restoring focus without scrolling
     requestAnimationFrame(() => {
       btnRef.current?.focus({ preventScroll: true });
     });
@@ -139,16 +119,15 @@ const SideDrawer = () => {
 
   return (
     <>
-      {/* Trigger button */}
       <IconButton
         ref={btnRef}
         onClick={onOpen}
         aria-label="Menu"
         icon={<FaBars />}
         variant="ghost"
+        size="sm"
       />
 
-      {/* Drawer */}
       <Drawer
         isOpen={isOpen}
         placement="left"
@@ -164,11 +143,8 @@ const SideDrawer = () => {
               <NavLink scrollTo="about" event={handleClose}>
                 About
               </NavLink>
-              <NavLink scrollTo="blogs" event={handleClose}>
-                Blog
-              </NavLink>
               <NavLink scrollTo="projects" event={handleClose}>
-                My Work
+                Projects
               </NavLink>
             </VStack>
           </DrawerBody>
@@ -188,49 +164,63 @@ export default function Navigation() {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <>
-      <Box py={10} px={{ base: 5, md: 20, xl: 40 }}>
-        <Flex alignItems={"center"} justifyContent={"space-between"}>
-          <Box as={"a"} href="/">
-            <Image
-              maxW={10}
-              src={colorMode === "light" ? "/logo_light.png" : "/logo_dark.png"}
-              alt={colorMode === "light" ? "Light Logo" : "Dark Logo"}
-            />
+    <Box
+      py={4}
+      px={{ base: 5, md: 10, xl: 20 }}
+    >
+      <Flex
+        alignItems={"center"}
+        justifyContent={"space-between"}
+        bg={useColorModeValue(ColorScheme.light.cardBg, ColorScheme.dark.cardBg)}
+        border={"1px solid"}
+        borderColor={useColorModeValue(
+          ColorScheme.light.cardBorder,
+          ColorScheme.dark.cardBorder
+        )}
+        borderRadius={"xl"}
+        backdropFilter={"blur(20px)"}
+        px={6}
+        py={3}
+      >
+        {/* Logo */}
+        <Box as="a" href="/" display="flex" alignItems="center">
+          <Image
+            src={colorMode === "light" ? "/logo_light.png" : "/logo_dark.png"}
+            alt="Joel Henry Logo"
+            maxH="28px"
+            objectFit="contain"
+          />
+        </Box>
+
+        {/* Center nav links */}
+        <HStack
+          display={{ base: "none", lg: "flex" }}
+          spacing={8}
+        >
+          <NavLink scrollTo="about">About</NavLink>
+          <NavLink scrollTo="projects">Projects</NavLink>
+        </HStack>
+
+        {/* Right side actions */}
+        <HStack spacing={3}>
+          <Box display={{ base: "none", lg: "block" }}>
+            <NavButton scrollTo="contact">Get In Touch</NavButton>
           </Box>
-          <Stack alignItems={"center"} direction={"row"} spacing={5}>
-            <Stack
-              display={{ base: "none", lg: "flex" }}
-              direction={"row"}
-              spacing={5}
-              divider={NavDivider()}
-            >
-              <NavLink scrollTo="about">about</NavLink>
-              <NavLink scrollTo="blogs">blog</NavLink>
-              <NavLink scrollTo="projects">my work</NavLink>
-            </Stack>
 
-            <Box display={{ base: "none", lg: "block" }}>
-              <NavButton scrollTo="contact">get in touch</NavButton>
-            </Box>
+          <IconButton
+            aria-label="Toggle color mode"
+            icon={colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+            variant="ghost"
+            size="sm"
+            borderRadius="full"
+            onClick={toggleColorMode}
+          />
 
-            <Button
-              aspectRatio={"1/1"}
-              borderRadius={"full"}
-              size={"sm"}
-              variant={"ghost"}
-              onClick={toggleColorMode}
-            >
-              {" "}
-              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-            </Button>
-
-            <Box display={{ base: "block", lg: "none" }}>
-              <SideDrawer />
-            </Box>
-          </Stack>
-        </Flex>
-      </Box>
-    </>
+          <Box display={{ base: "block", lg: "none" }}>
+            <SideDrawer />
+          </Box>
+        </HStack>
+      </Flex>
+    </Box>
   );
 }

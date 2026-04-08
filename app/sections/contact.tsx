@@ -69,6 +69,22 @@ export default function ContactForm() {
     }
   };
 
+  const inputStyles = {
+    bg: useColorModeValue("rgba(0,0,0,0.02)", "rgba(255,255,255,0.04)"),
+    border: "1px solid",
+    borderColor: useColorModeValue(
+      ColorScheme.light.cardBorder,
+      ColorScheme.dark.cardBorder
+    ),
+    _focus: {
+      borderColor: useColorModeValue(
+        ColorScheme.light.primary,
+        ColorScheme.dark.primary
+      ),
+      boxShadow: "none",
+    },
+  };
+
   return (
     <Stack spacing={10} w={"full"}>
       <Box display={"flex"} justifyContent={"center"}>
@@ -80,55 +96,71 @@ export default function ContactForm() {
         onSubmit={handleSubmit}
         display={"flex"}
         justifyContent={"center"}
-        py={20}
+        py={12}
+        px={{ base: 6, md: 12 }}
         w={"full"}
-        borderRadius="md"
-        bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
-        boxShadow="lg"
+        borderRadius="2xl"
+        bg={useColorModeValue(
+          ColorScheme.light.cardBg,
+          ColorScheme.dark.cardBg
+        )}
+        border="1px solid"
+        borderColor={useColorModeValue(
+          ColorScheme.light.cardBorder,
+          ColorScheme.dark.cardBorder
+        )}
+        backdropFilter="blur(20px)"
       >
-        <VStack spacing={4} maxW={{ base: "full", md: "lg" }}>
+        <VStack spacing={4} maxW={{ base: "full", md: "lg" }} w="full">
           <FormControl isRequired>
-            <FormLabel>Name</FormLabel>
+            <FormLabel fontSize="sm" opacity={0.7}>Name</FormLabel>
             <Input
               type="text"
               name="name"
               placeholder="Your name"
               value={formData.name}
               onChange={handleChange}
+              {...inputStyles}
             />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Email</FormLabel>
+            <FormLabel fontSize="sm" opacity={0.7}>Email</FormLabel>
             <Input
               type="email"
               name="email"
               placeholder="you@example.com"
               value={formData.email}
               onChange={handleChange}
+              {...inputStyles}
             />
           </FormControl>
 
           <FormControl isRequired>
-            <FormLabel>Message</FormLabel>
+            <FormLabel fontSize="sm" opacity={0.7}>Message</FormLabel>
             <Textarea
               name="message"
               placeholder="Your message"
               rows={5}
               value={formData.message}
               onChange={handleChange}
+              {...inputStyles}
             />
           </FormControl>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             width="full"
             isLoading={isSubmitting}
             loadingText="Sending..."
-            bg={useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary)}
-            color="white"
+            bg={useColorModeValue(
+              ColorScheme.light.primary,
+              ColorScheme.dark.primary
+            )}
+            color={useColorModeValue("white", "#0a0a0a")}
+            fontWeight="medium"
             _hover={{
-              opacity: 0.9,
+              opacity: 0.85,
             }}
           >
             Send Message

@@ -23,20 +23,37 @@ interface BlogCardProps {
 }
 
 function BlogCard({ blog }: BlogCardProps) {
-  const cardBg = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const tagBg = useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary);
+  const cardBg = useColorModeValue(
+    ColorScheme.light.cardBg,
+    ColorScheme.dark.cardBg
+  );
+  const borderColor = useColorModeValue(
+    ColorScheme.light.cardBorder,
+    ColorScheme.dark.cardBorder
+  );
+  const tagBg = useColorModeValue(
+    "rgba(0,0,0,0.06)",
+    "rgba(255,255,255,0.08)"
+  );
+  const tagColor = useColorModeValue(
+    ColorScheme.light.text,
+    ColorScheme.dark.text
+  );
 
   return (
     <Card
       bg={cardBg}
-      border="1px"
+      border="1px solid"
       borderColor={borderColor}
-      borderRadius="lg"
+      borderRadius="xl"
       overflow="hidden"
+      backdropFilter="blur(20px)"
       _hover={{
         transform: "translateY(-4px)",
-        shadow: "lg",
+        borderColor: useColorModeValue(
+          ColorScheme.light.primary,
+          "rgba(200, 230, 78, 0.3)"
+        ),
       }}
       transition="all 0.2s"
       cursor="pointer"
@@ -51,12 +68,12 @@ function BlogCard({ blog }: BlogCardProps) {
             <Heading size="md" mb={2} noOfLines={2}>
               {blog.title}
             </Heading>
-            <Text fontSize="sm" color="gray.500" mb={3}>
+            <Text fontSize="sm" opacity={0.5} mb={3}>
               {new Date(blog.dateAdded).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
-              })} • {blog.readTime} min read
+              })} - {blog.readTime} min read
             </Text>
             <Content>
               <Text noOfLines={3}>{blog.brief}</Text>
@@ -68,8 +85,9 @@ function BlogCard({ blog }: BlogCardProps) {
                 key={index}
                 size="sm"
                 bg={tagBg}
-                color="white"
-                opacity={0.9}
+                color={tagColor}
+                opacity={0.8}
+                borderRadius="full"
               >
                 {tag}
               </Tag>
@@ -83,7 +101,6 @@ function BlogCard({ blog }: BlogCardProps) {
 
 export default function BlogSection() {
   const latestBlogs = blogs.slice(0, 3);
-
 
   return (
     <Stack alignItems="center" textAlign="center" spacing={8}>
@@ -100,14 +117,17 @@ export default function BlogSection() {
         href="https://console-logs.hashnode.dev/?source=top_nav_blog_home"
         isExternal
         rightIcon={<ExternalLinkIcon />}
-        rounded={0}
-        textAlign="center"
-        bg={useColorModeValue(ColorScheme.light.primary, ColorScheme.dark.primary)}
-        color="white"
+        bg={useColorModeValue(
+          ColorScheme.light.primary,
+          ColorScheme.dark.primary
+        )}
+        color={useColorModeValue("white", "#0a0a0a")}
+        fontWeight="medium"
+        borderRadius="lg"
         _hover={{
-          opacity: 0.9,
+          opacity: 0.85,
         }}
-        mt={8}
+        mt={4}
       >
         View All Blog Posts
       </Button>

@@ -1,10 +1,10 @@
 .animated-gradient {
   &.dark {
-    background: linear-gradient(334deg, rgba(15,55,94,1), rgba(13,31,62,1), rgba(10,39,55,1));
+    background: linear-gradient(160deg, #0a0a0a, #111111, #0d0d0d);
   }
 
   &.light {
-    background: linear-gradient(334deg, rgba(241,248,255,1), rgba(255,255,255,1), rgba(248,253,255,1));
+    background: linear-gradient(160deg, #f7f6f2, #fafaf7, #f4f3ef);
   }
 
   background-size: 180% 180%;
