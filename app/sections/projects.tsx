@@ -19,7 +19,7 @@ import {
 import projects, { ProjectInterface } from "../content/projects";
 import ColorScheme from "../assets/colors";
 import { Content } from "./header";
-import { ArrowRight, Code, PlayOne, DocDetail, Pen } from "@icon-park/react";
+import { ArrowRight, Code, PlayOne,  Pencil } from "@icon-park/react";
 
 function Project({ project }: { project: ProjectInterface }) {
   const placement = useBreakpointValue<PlacementWithLogical>({
@@ -138,7 +138,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   Read Post
                   <Box pl={2} as="span">
                     {" "}
-                    <Pen />
+                    <Pencil />
                   </Box>
                 </Button>
               )}
