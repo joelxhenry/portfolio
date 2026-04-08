@@ -167,6 +167,8 @@ export default function Navigation() {
     <Box
       py={4}
       px={{ base: 5, md: 10, xl: 20 }}
+      maxW="1400px"
+      mx="auto"
     >
       <Flex
         alignItems={"center"}

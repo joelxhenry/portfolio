@@ -32,8 +32,10 @@ export default function Home() {
       <Box position={"relative"}>
         <Navigation />
         <Box
-          py={4}
+          py={{ base: 6, md: 10, xl: 14 }}
           px={{ base: 5, md: 10, xl: 20 }}
+          maxW="1400px"
+          mx="auto"
         >
           <Header />
         </Box>
