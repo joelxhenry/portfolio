@@ -6,9 +6,9 @@ import { Content } from "./header";
 
 export default function AboutMe() {
   return (
-    <Stack alignItems={"center"} textAlign={"center"}>
+    <Stack alignItems={"flex-start"} textAlign={"left"}>
       <Title>about me.</Title>
-      <Box py={10} display={"flex"} flexDirection={"column"} gap={5}>
+      <Box py={10} display={"flex"} flexDirection={"column"} gap={5} maxW="700px">
         {aboutContent.paragraphs.map((paragraph, index) => (
           <Content key={index}>
             {paragraph}
@@ -18,7 +18,6 @@ export default function AboutMe() {
 
       <Button
         borderRadius="lg"
-        textAlign={"end"}
         as="a"
         href={`/${aboutContent.resumeFileName}`}
         download={aboutContent.resumeFileName}

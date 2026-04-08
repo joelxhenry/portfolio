@@ -16,8 +16,7 @@ const projects: ProjectInterface[] = [
   {
     title: "Kova",
     description: `Built a custom invoicing tool powered by AI to streamline invoice generation, management, and tracking. Designed to solve real-world billing pain points with intelligent automation and a clean, intuitive interface.`,
-    image:
-      "https://console-logs.hashnode.dev/_next/image?url=https%3A%2F%2Fcdn.hashnode.com%2Fuploads%2Fcovers%2F68629f4b54d9ed2c64408dd6%2F82ca2050-d368-473d-9245-28ac2eb8bb70.jpg&w=3840&q=75",
+    image: "/KOVA.jpg",
     blog_link:
       "https://console-logs.hashnode.dev/i-built-my-own-invoicing-tool-using-ai-here-s-why-that-matters",
     stack: ["AI", "TypeScript", "Next.js"],

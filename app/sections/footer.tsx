@@ -29,9 +29,9 @@ const Footer = () => {
         direction={{ base: "column", md: "row" }}
         justify="space-between"
         align="center"
-        maxW="6xl"
+        maxW="1400px"
         mx="auto"
-        px={6}
+        px={{ base: 5, md: 10, xl: 20 }}
         gap={6}
       >
         <Flex align="center" gap={3}>

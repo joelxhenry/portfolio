@@ -86,19 +86,16 @@ export default function ContactForm() {
   };
 
   return (
-    <Stack spacing={10} w={"full"}>
-      <Box display={"flex"} justifyContent={"center"}>
-        <Title>get in touch.</Title>
-      </Box>
+    <Stack spacing={10} w={"full"} alignItems="flex-start">
+      <Title>get in touch.</Title>
 
       <Box
         as="form"
         onSubmit={handleSubmit}
-        display={"flex"}
-        justifyContent={"center"}
         py={12}
         px={{ base: 6, md: 12 }}
         w={"full"}
+        maxW="600px"
         borderRadius="2xl"
         bg={useColorModeValue(
           ColorScheme.light.cardBg,
@@ -111,7 +108,7 @@ export default function ContactForm() {
         )}
         backdropFilter="blur(20px)"
       >
-        <VStack spacing={4} maxW={{ base: "full", md: "lg" }} w="full">
+        <VStack spacing={4} w="full">
           <FormControl isRequired>
             <FormLabel fontSize="sm" opacity={0.7}>Name</FormLabel>
             <Input
