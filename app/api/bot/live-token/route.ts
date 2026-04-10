@@ -19,23 +19,33 @@ import { buildSystemInstruction } from '@/app/lib/bot/prompt';
 
 export const runtime = 'nodejs';
 
-// Gemini Live model ID. The installed @google/genai@1.49.0 SDK's own
-// docstring example references `gemini-live-2.5-flash-preview`, but as of
-// late 2025 that preview name has been rotated out of Google's model
-// registry — attempting to connect with it returns "models/... is not
-// found for API version v1main, or is not supported for
-// bidiGenerateContent" over the WebSocket.
+// Gemini Live models rotate frequently — preview names get renamed or
+// deprecated without warning, and which models are actually available
+// depends on the specific GEMINI_API_KEY's project, tier, and region.
+// Hardcoding a single name keeps breaking, so instead we dynamically
+// query `models.list()` for models that report `bidiGenerateContent` in
+// their `supportedGenerationMethods` and pick the best one per the
+// preference order below.
 //
-// `gemini-2.0-flash-live-001` is the GA half-cascade Live model and is
-// the most stable choice for a portfolio site (no preview-rotation risk).
-// If you want the newer 2.5-era Live preview, candidates to try — all are
-// still in preview and subject to the same rotation:
-//   - gemini-2.5-flash-preview-native-audio-dialog
-//   - gemini-2.5-flash-exp-native-audio-thinking-dialog
-// Verify what's live on your key by running:
-//   curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY" \
-//     | jq '.models[] | select(.supportedGenerationMethods[]? == "bidiGenerateContent") | .name'
-const MODEL = 'gemini-2.0-flash-live-001';
+// If you want to pin a specific model, set GEMINI_LIVE_MODEL in .env.
+// Otherwise the route picks automatically.
+//
+// Preference order: GA half-cascade first (most stable) → 2.5-era
+// previews → experimentals. The first match wins.
+const MODEL_PREFERENCE_ORDER = [
+  'gemini-2.0-flash-live-001',
+  'gemini-live-2.5-flash-preview',
+  'gemini-2.5-flash-preview-native-audio-dialog',
+  'gemini-2.5-flash-exp-native-audio-thinking-dialog',
+  'gemini-2.0-flash-exp',
+];
+
+// Module-scoped cache for the picked model. `models.list()` is a
+// non-trivial HTTP call and the answer doesn't change turn-to-turn, so
+// memoizing for the server process lifetime (or MODEL_CACHE_TTL_MS,
+// whichever is shorter) is fine.
+const MODEL_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+let cachedModelPick: { model: string; pickedAt: number } | null = null;
 // Prebuilt Live voice — the SDK ships "Charon" as a warm, mid-range option.
 // Chosen to match the Chirp3-HD pick in /api/bot/speak (Phase 3) so the bot
 // sounds the same across both pipelines during the Phase 4 A/B.
@@ -102,6 +112,86 @@ function checkRateLimit(
   return { ok: true };
 }
 
+interface ModelListResponse {
+  models?: Array<{
+    name?: string;
+    supportedGenerationMethods?: string[];
+  }>;
+}
+
+/**
+ * Query Google's models.list REST endpoint for the supplied API key and
+ * pick the best Live-capable model according to MODEL_PREFERENCE_ORDER.
+ * Returns null if the API call fails or no bidi-capable model is
+ * available on this key. Cached for MODEL_CACHE_TTL_MS per server
+ * process.
+ */
+async function pickBidiModel(apiKey: string): Promise<string | null> {
+  // Env override wins — lets you pin a specific model without a deploy.
+  const override = process.env.GEMINI_LIVE_MODEL;
+  if (override && override.length > 0) {
+    return override;
+  }
+
+  const now = Date.now();
+  if (cachedModelPick && now - cachedModelPick.pickedAt < MODEL_CACHE_TTL_MS) {
+    return cachedModelPick.model;
+  }
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}&pageSize=200`,
+      {
+        method: 'GET',
+        headers: { accept: 'application/json' },
+      },
+    );
+    if (!response.ok) {
+      console.error(
+        '[bot/live-token] models.list returned',
+        response.status,
+        (await response.text().catch(() => '')).slice(0, 300),
+      );
+      return null;
+    }
+    const data = (await response.json()) as ModelListResponse;
+    const bidiModels = (data.models ?? [])
+      .filter((model) =>
+        Array.isArray(model.supportedGenerationMethods) &&
+        model.supportedGenerationMethods.includes('bidiGenerateContent'),
+      )
+      .map((model) => (model.name ?? '').replace(/^models\//, ''))
+      .filter((name): name is string => name.length > 0);
+
+    if (bidiModels.length === 0) {
+      console.error(
+        '[bot/live-token] no bidi-capable models available on this key',
+      );
+      return null;
+    }
+
+    // Log the discovered list once — priceless for diagnosing future
+    // model rotations.
+    console.info('[bot/live-token] available bidi models:', bidiModels);
+
+    // Return the first preference that's available on this key.
+    for (const preferred of MODEL_PREFERENCE_ORDER) {
+      if (bidiModels.includes(preferred)) {
+        cachedModelPick = { model: preferred, pickedAt: now };
+        return preferred;
+      }
+    }
+    // None of the preferred names matched — fall back to whatever the
+    // key does have.
+    const fallback = bidiModels[0]!;
+    cachedModelPick = { model: fallback, pickedAt: now };
+    return fallback;
+  } catch (error) {
+    console.error('[bot/live-token] models.list failed:', error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   // Two flags so Phase 3 can keep running with Phase 4 turned off (the
   // default). Either being missing returns 404 — same defence-in-depth
@@ -134,6 +224,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Pick a bidi-capable model dynamically. If the account has no Live
+  // API access at all, this returns null and we surface a clear error
+  // instead of minting a token that's guaranteed to fail at connect
+  // time.
+  const pickedModel = await pickBidiModel(apiKey);
+  if (!pickedModel) {
+    return NextResponse.json(
+      {
+        error:
+          'No Gemini Live model available on this API key. Confirm your project has the Live API enabled and that bidiGenerateContent is listed in models.list.',
+      },
+      { status: 503 },
+    );
+  }
+
   // Ephemeral auth tokens are v1alpha-only on the Gemini Developer API per
   // the SDK docs on `ai.tokens.create`.
   const ai = new GoogleGenAI({
@@ -151,7 +256,7 @@ export async function POST(request: NextRequest) {
         ).toISOString(),
         expireTime: new Date(now + SESSION_LIFETIME_MS).toISOString(),
         liveConnectConstraints: {
-          model: MODEL,
+          model: pickedModel,
           config: {
             responseModalities: [Modality.AUDIO],
             systemInstruction: buildSystemInstruction(),
@@ -182,7 +287,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         token: token.name,
-        model: MODEL,
+        model: pickedModel,
         sessionExpiresAt: new Date(now + SESSION_LIFETIME_MS).toISOString(),
       },
       { headers: { 'cache-control': 'no-store' } },
