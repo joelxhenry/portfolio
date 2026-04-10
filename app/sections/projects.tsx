@@ -19,7 +19,17 @@ import {
 import projects, { ProjectInterface } from "../content/projects";
 import ColorScheme from "../assets/colors";
 import { Content } from "./header";
-import { ArrowRight, Code, PlayOne,  Pencil } from "@icon-park/react";
+import {
+  BsArrowRight,
+  BsCodeSlash,
+  BsPencilFill,
+  BsPlayFill,
+} from "react-icons/bs";
+// Note: these icons used to come from @icon-park/react, which generates
+// random IDs for its internal SVG clipPath definitions on every render.
+// That produced a hydration mismatch under Next.js SSR ("Prop `clipPath`
+// did not match"). react-icons renders deterministic SVG and matches the
+// icon language used elsewhere on the site.
 
 function Project({ project }: { project: ProjectInterface }) {
   const placement = useBreakpointValue<PlacementWithLogical>({
@@ -104,7 +114,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   Preview{" "}
                   <Box pl={2} as="span">
                     {" "}
-                    <PlayOne />
+                    <BsPlayFill />
                   </Box>
                 </Button>
               )}
@@ -121,7 +131,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   Source Code
                   <Box pl={2} as="span">
                     {" "}
-                    <Code />
+                    <BsCodeSlash />
                   </Box>
                 </Button>
               )}
@@ -138,7 +148,7 @@ function Project({ project }: { project: ProjectInterface }) {
                   Read Post
                   <Box pl={2} as="span">
                     {" "}
-                    <Pencil />
+                    <BsPencilFill />
                   </Box>
                 </Button>
               )}
@@ -178,7 +188,7 @@ function Project({ project }: { project: ProjectInterface }) {
             <List>
               {project.stack.map((tool, i) => (
                 <HStack gap={2} key={i}>
-                  <ListIcon as={() => <ArrowRight />} />
+                  <ListIcon as={BsArrowRight} />
                   <Box>{tool}</Box>
                 </HStack>
               ))}

@@ -14,6 +14,7 @@ import AboutMe from "./sections/about";
 import Skills from "./sections/skills";
 import ContactForm from "./sections/contact";
 import Footer from "./sections/footer";
+import BotLauncher from "./sections/bot-launcher";
 
 export default function Home() {
   const { colorMode } = useColorMode();
@@ -62,6 +63,11 @@ export default function Home() {
       </Container>
 
       <Footer />
+
+      {/* BotLauncher is headless now — it renders only the Modal dialog
+          and a window-event listener for OPEN_BOT_EVENT, which the About
+          section dispatches from its animated AI advocate button. */}
+      <BotLauncher />
 
       {loaded ? (
         <AnimatedCursor
