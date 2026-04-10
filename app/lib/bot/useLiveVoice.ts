@@ -219,15 +219,31 @@ export function useLiveVoice(
   const teardown = useCallback(() => {
     stopPlayback();
 
+    // Clear the session ref *first* so any in-flight worklet port message
+    // that lands during teardown short-circuits on `!sessionRef.current`
+    // instead of racing into a `sendRealtimeInput` call on a dead socket.
+    const sessionToClose = sessionRef.current;
+    sessionRef.current = null;
     try {
-      sessionRef.current?.close();
+      sessionToClose?.close();
     } catch {
       // Closing an already-closed session throws on some SDK builds.
     }
-    sessionRef.current = null;
 
+    // Detach the worklet's message handler so no further mic chunks try
+    // to reach a nulled-out session. Silence the port itself before we
+    // disconnect the node.
+    const workletNode = workletNodeRef.current;
+    if (workletNode) {
+      try {
+        workletNode.port.onmessage = null;
+      } catch {
+        // noop — some browsers are strict about touching the port after
+        // the context has closed.
+      }
+    }
     try {
-      workletNodeRef.current?.disconnect();
+      workletNode?.disconnect();
     } catch {
       // noop
     }
@@ -465,6 +481,8 @@ export function useLiveVoice(
         model,
         callbacks: {
           onopen: () => {
+            // eslint-disable-next-line no-console
+            console.info('[useLiveVoice] session opened', { model });
             setStatus('listening');
           },
           onmessage: (msg) => {
@@ -485,11 +503,50 @@ export function useLiveVoice(
             setStatus('error');
             teardown();
           },
-          onclose: () => {
-            // Normal close (`session.close()` or server-initiated end)
-            // lands here. Preserve an existing `error` state so the user
-            // sees the actual cause.
-            setStatus((prev) => (prev === 'error' ? 'error' : 'idle'));
+          onclose: (event) => {
+            // The Live API wraps the raw WebSocket close event — `code` and
+            // `reason` are the most useful things we get for debugging.
+            // Codes 1000/1001 are clean; anything else points at a real
+            // problem (bad model name, rate limit, auth, etc.).
+            const closeEvent = event as unknown as
+              | { code?: number; reason?: string; wasClean?: boolean }
+              | undefined;
+            // eslint-disable-next-line no-console
+            console.info('[useLiveVoice] session closed', {
+              code: closeEvent?.code,
+              reason: closeEvent?.reason,
+              wasClean: closeEvent?.wasClean,
+            });
+
+            // Clear the session ref immediately so the worklet handler
+            // below stops trying to send on a dead socket.
+            sessionRef.current = null;
+
+            const closeReason = closeEvent?.reason;
+            const isUnclean =
+              typeof closeEvent?.code === 'number' &&
+              closeEvent.code !== 1000 &&
+              closeEvent.code !== 1001;
+
+            if (isUnclean) {
+              // Surface the server's reason if it gave us one — much more
+              // useful than "WebSocket is already in CLOSING or CLOSED".
+              const message =
+                closeReason && closeReason.length > 0
+                  ? `Session closed: ${closeReason} (code ${closeEvent?.code})`
+                  : `Session closed unexpectedly (code ${closeEvent?.code})`;
+              setError(message);
+              setStatus('error');
+            } else {
+              // Clean close (either our own stop() or a server-initiated
+              // end). Preserve an existing error state; otherwise fall
+              // back to idle.
+              setStatus((prev) => (prev === 'error' ? 'error' : 'idle'));
+            }
+
+            // Tear down the rest of the audio graph so the mic is
+            // released and we stop burning CPU on a dead session.
+            teardown();
           },
         },
         config: {
@@ -513,6 +570,15 @@ export function useLiveVoice(
             },
           });
         } catch (err) {
+          // Race: the socket can close between `sessionRef.current` being
+          // non-null and the `send` call landing. The SDK surfaces that as
+          // `WebSocket is already in CLOSING or CLOSED state`. Swallow
+          // that specific case quietly — onclose will handle the real
+          // shutdown. Anything else is worth logging.
+          const message = (err as Error)?.message ?? '';
+          if (message.includes('CLOSING') || message.includes('CLOSED')) {
+            return;
+          }
           // eslint-disable-next-line no-console
           console.error('[useLiveVoice] sendRealtimeInput failed', err);
         }
