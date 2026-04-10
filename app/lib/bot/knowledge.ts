@@ -15,6 +15,8 @@ import blogs from '@/app/content/blogs';
 export function buildKnowledgeBase(): string {
   return [
     buildAboutSection(),
+    buildEducationSection(),
+    buildContactSection(),
     buildExperienceSection(),
     buildProjectsSection(),
     buildSkillsSection(),
@@ -24,10 +26,33 @@ export function buildKnowledgeBase(): string {
 
 function buildAboutSection(): string {
   const lines: string[] = ['## About Joel', ''];
+  lines.push('### Professional Summary', '');
+  lines.push(normalizeWhitespace(aboutContent.summary), '');
+  lines.push('### Narrative', '');
   for (const paragraph of aboutContent.paragraphs) {
     lines.push(normalizeWhitespace(paragraph), '');
   }
   return lines.join('\n').trimEnd();
+}
+
+function buildEducationSection(): string {
+  const { degree, school, year } = aboutContent.education;
+  return `## Education\n\n- ${degree} — ${school} (${year})`;
+}
+
+function buildContactSection(): string {
+  // Contact details Joel has already put on his public resume. The bot is
+  // still instructed via the system prompt (see app/lib/bot/prompt.ts) not
+  // to volunteer personal details beyond the public portfolio, but having
+  // the canonical location + site makes "where is Joel based?" answerable.
+  const { location, website } = aboutContent.contact;
+  return [
+    '## Contact & Location',
+    '',
+    `- Location: ${location}`,
+    `- Portfolio: ${website}`,
+    '- For direct contact, always point visitors at the contact form on this site.',
+  ].join('\n');
 }
 
 function buildExperienceSection(): string {

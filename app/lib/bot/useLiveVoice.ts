@@ -44,6 +44,18 @@ export interface UseLiveVoiceResult {
   speaking: boolean;
   start: () => Promise<void>;
   stop: () => void;
+  /**
+   * Live AnalyserNode tapping the bot's output audio chain. Consumers (e.g.
+   * the visualizer canvas) poll this in a requestAnimationFrame loop via
+   * `getByteFrequencyData` / `getByteTimeDomainData`. Null until the first
+   * `start()` has set up the output context.
+   */
+  getOutputAnalyser: () => AnalyserNode | null;
+  /**
+   * Live AnalyserNode tapping the visitor's microphone stream. Same usage
+   * as `getOutputAnalyser`; null until the session is running.
+   */
+  getInputAnalyser: () => AnalyserNode | null;
 }
 
 const INPUT_SAMPLE_RATE = 16000;
@@ -101,6 +113,13 @@ export function useLiveVoice(
   const silentGainRef = useRef<GainNode | null>(null);
   const activeSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const nextPlaybackTimeRef = useRef<number>(0);
+  // AnalyserNodes for the audio-reactive UI. Created lazily in `start()`
+  // once the input and output AudioContexts exist, torn down in `teardown`.
+  // Exposed to consumers via the `getOutputAnalyser` / `getInputAnalyser`
+  // getters so the visualizer can read frequency data each animation frame
+  // without re-rendering the hook.
+  const outputAnalyserRef = useRef<AnalyserNode | null>(null);
+  const inputAnalyserRef = useRef<AnalyserNode | null>(null);
 
   const mutedRef = useRef(options.muted ?? false);
 
@@ -174,7 +193,15 @@ export function useLiveVoice(
     buffer.copyToChannel(float32, 0);
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-    source.connect(ctx.destination);
+    // Route every buffer source through the shared output AnalyserNode so
+    // the visualizer can read frequency data on the bot's voice. The
+    // analyser is a pass-through that forwards to the context destination.
+    const analyser = outputAnalyserRef.current;
+    if (analyser) {
+      source.connect(analyser);
+    } else {
+      source.connect(ctx.destination);
+    }
     const now = ctx.currentTime;
     const startAt = Math.max(nextPlaybackTimeRef.current, now);
     source.start(startAt);
@@ -217,6 +244,18 @@ export function useLiveVoice(
       // noop
     }
     silentGainRef.current = null;
+    try {
+      outputAnalyserRef.current?.disconnect();
+    } catch {
+      // noop
+    }
+    outputAnalyserRef.current = null;
+    try {
+      inputAnalyserRef.current?.disconnect();
+    } catch {
+      // noop
+    }
+    inputAnalyserRef.current = null;
 
     const stream = mediaStreamRef.current;
     if (stream) {
@@ -387,6 +426,15 @@ export function useLiveVoice(
         });
       }
 
+      // 5b. Output analyser sits between every AudioBufferSourceNode and
+      //     the destination. fftSize 1024 gives 512 frequency bins — plenty
+      //     for a smooth-looking spectrum without wasting CPU.
+      const outputAnalyser = outputCtx.createAnalyser();
+      outputAnalyser.fftSize = 1024;
+      outputAnalyser.smoothingTimeConstant = 0.7;
+      outputAnalyser.connect(outputCtx.destination);
+      outputAnalyserRef.current = outputAnalyser;
+
       // 6. Wire the mic through the worklet. We connect the worklet to a
       //    silent gain → destination so process() keeps firing in all
       //    browsers (some engines gate worklet execution on there being a
@@ -400,6 +448,15 @@ export function useLiveVoice(
       silentGainRef.current = silentGain;
       sourceNode.connect(workletNode);
       workletNode.connect(silentGain).connect(inputCtx.destination);
+
+      // 6b. Input analyser — taps the mic source directly so the visualizer
+      //     can animate while the visitor is speaking, not just when the
+      //     bot is talking. Not part of any audible path.
+      const inputAnalyser = inputCtx.createAnalyser();
+      inputAnalyser.fftSize = 1024;
+      inputAnalyser.smoothingTimeConstant = 0.75;
+      sourceNode.connect(inputAnalyser);
+      inputAnalyserRef.current = inputAnalyser;
 
       // 7. Open the Live session. The ephemeral token already pins the
       //    model, system instruction, voice, and transcription config; the
@@ -474,5 +531,16 @@ export function useLiveVoice(
     setStatus('idle');
   }, [teardown]);
 
-  return { status, error, speaking, start, stop };
+  const getOutputAnalyser = useCallback(() => outputAnalyserRef.current, []);
+  const getInputAnalyser = useCallback(() => inputAnalyserRef.current, []);
+
+  return {
+    status,
+    error,
+    speaking,
+    start,
+    stop,
+    getOutputAnalyser,
+    getInputAnalyser,
+  };
 }

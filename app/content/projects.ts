@@ -15,7 +15,7 @@ export interface ProjectInterface {
 const projects: ProjectInterface[] = [
   {
     title: "Kova",
-    description: `Built a custom invoicing tool powered by AI to streamline invoice generation, management, and tracking. Designed to solve real-world billing pain points with intelligent automation and a clean, intuitive interface.`,
+    description: `An AI-powered invoicing tool — and itself built with AI as a coding collaborator. Kova streamlines invoice generation, management, and tracking with intelligent automation and a clean, intuitive interface, solving real billing pain points end to end.`,
     image: "/KOVA.jpg",
     blog_link:
       "https://console-logs.hashnode.dev/i-built-my-own-invoicing-tool-using-ai-here-s-why-that-matters",

@@ -1,17 +1,16 @@
+"use client";
+
 import {
   Box,
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
   Flex,
   HStack,
   Icon,
   IconButton,
+  Modal,
+  ModalContent,
+  ModalOverlay,
+  Stack,
   Text,
-  Textarea,
   Tooltip,
   VStack,
   keyframes,
@@ -23,45 +22,44 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BsBroadcast,
-  BsChatDots,
   BsMicFill,
-  BsMicMuteFill,
-  BsSend,
   BsStars,
   BsStopFill,
   BsVolumeMuteFill,
   BsVolumeUpFill,
 } from "react-icons/bs";
-import { FaUser } from "react-icons/fa";
 
 import ColorScheme from "../assets/colors";
 import FontScheme from "../assets/fonts";
+import BotVisualizer from "../components/bot-visualizer";
 import { useLiveVoice } from "../lib/bot/useLiveVoice";
-import { useVoiceInput } from "../lib/bot/useVoiceInput";
-import { useVoicePlayback } from "../lib/bot/useVoicePlayback";
 
-// Phase 2 of .plans/bot.md — a floating "Ask AI" button that opens a Chakra
-// Drawer hosting a text chat with /api/bot/chat. The whole surface is gated
-// on NEXT_PUBLIC_BOT_ENABLED so the feature can be toggled off without a
-// redeploy.
+// Phase 4 UI, second iteration — the text chat is gone. The only bot
+// experience on the site is now a live, bidirectional Gemini voice
+// conversation rendered inside a centered Chakra Modal. A single floating
+// "Ask AI" button triggers it; the About section's animated advocate
+// button dispatches the same window event (`OPEN_BOT_EVENT`) so both
+// entry points open the same modal.
 //
-// Phase 4 adds an optional "Live" mode on top, gated separately on
-// NEXT_PUBLIC_BOT_LIVE_MODE_ENABLED. When the flag is on, a mode toggle in
-// the drawer header lets the visitor swap between the Phase 3 stitched
-// pipeline and the Gemini Live bidirectional pipeline (`useLiveVoice`), so
-// the two can be A/B compared in real use — exactly what the plan's Phase 4
-// exit criterion asks for.
+// Audio plumbing stays in `useLiveVoice`. This file owns the dialog UI:
+// the layered visualizer, the transcripts strip, status copy, mic/mute
+// controls, and the window-event glue.
 
-const MAX_USER_MESSAGE_CHARS = 2000;
+// Event other sections dispatch to open the dialog. Kept exported so the
+// AboutMe section can import it without poking at the launcher's
+// internals. Detail payload is deliberately empty for now — every open
+// lands in the live experience.
+export const OPEN_BOT_EVENT = "portfolio:open-bot";
+export interface OpenBotDetail {
+  /** Reserved for future use. */
+  mode?: "live";
+}
 
-const GREETING =
-  "Hey — I'm here to tell you why Joel would be a great fit for your team. What's the role you're hiring for?";
+type TranscriptRole = "user" | "assistant";
 
-type ChatRole = "user" | "assistant";
-
-interface ChatMessage {
+interface TranscriptEntry {
   id: string;
-  role: ChatRole;
+  role: TranscriptRole;
   content: string;
 }
 
@@ -69,133 +67,26 @@ function makeId(): string {
   return Math.random().toString(36).slice(2);
 }
 
-function initialMessages(): ChatMessage[] {
-  return [{ id: makeId(), role: "assistant", content: GREETING }];
-}
-
 const MotionBox = motion(Box);
 
-// Subtle pulse used on the bot avatar while audio is being spoken, and on the
-// mic button while the browser is actively listening to the visitor.
+// Subtle pulse reused on the status dot and the Stop button ring.
 const pulseRing = keyframes`
   0%   { box-shadow: 0 0 0 0 rgba(127, 127, 127, 0.35); }
-  70%  { box-shadow: 0 0 0 8px rgba(127, 127, 127, 0); }
+  70%  { box-shadow: 0 0 0 10px rgba(127, 127, 127, 0); }
   100% { box-shadow: 0 0 0 0 rgba(127, 127, 127, 0); }
 `;
 
-interface AvatarProps {
-  role: ChatRole;
-  speaking?: boolean;
-}
-
-function Avatar({ role, speaking = false }: AvatarProps) {
-  const primary = useColorModeValue(
-    ColorScheme.light.primary,
-    ColorScheme.dark.primary,
-  );
-  const secondary = useColorModeValue(
-    ColorScheme.light.secondary,
-    ColorScheme.dark.secondary,
-  );
-  const textColor = useColorModeValue(
-    ColorScheme.light.text,
-    ColorScheme.dark.text,
-  );
-  const subtleBg = useColorModeValue(
-    "rgba(0,0,0,0.04)",
-    "rgba(255,255,255,0.06)",
-  );
-  const subtleBorder = useColorModeValue(
-    "rgba(0,0,0,0.08)",
-    "rgba(255,255,255,0.08)",
-  );
-
-  const isBot = role === "assistant";
-  const animation =
-    isBot && speaking ? `${pulseRing} 1.4s ease-out infinite` : undefined;
-
-  return (
-    <Flex
-      w={8}
-      h={8}
-      minW={8}
-      borderRadius="full"
-      alignItems="center"
-      justifyContent="center"
-      bg={isBot ? secondary : subtleBg}
-      border="1px solid"
-      borderColor={isBot ? primary : subtleBorder}
-      color={isBot ? primary : textColor}
-      opacity={isBot ? 1 : 0.7}
-      animation={animation}
-      aria-label={isBot && speaking ? "Bot is speaking" : undefined}
-    >
-      <Icon as={isBot ? BsStars : FaUser} fontSize="sm" />
-    </Flex>
-  );
-}
-
-interface MessageBubbleProps {
-  message: ChatMessage;
-  isStreaming?: boolean;
-  isSpeaking?: boolean;
-}
-
-function MessageBubble({ message, isStreaming, isSpeaking }: MessageBubbleProps) {
-  const cardBg = useColorModeValue(
-    ColorScheme.light.cardBg,
-    ColorScheme.dark.cardBg,
-  );
-  const cardBorder = useColorModeValue(
-    ColorScheme.light.cardBorder,
-    ColorScheme.dark.cardBorder,
-  );
-  const textColor = useColorModeValue(
-    ColorScheme.light.text,
-    ColorScheme.dark.text,
-  );
-
-  const isUser = message.role === "user";
-
-  return (
-    <HStack
-      align="flex-start"
-      spacing={3}
-      flexDirection={isUser ? "row-reverse" : "row"}
-      w="full"
-    >
-      <Avatar role={message.role} speaking={isSpeaking} />
-      <Box
-        bg={cardBg}
-        border="1px solid"
-        borderColor={cardBorder}
-        borderRadius="xl"
-        backdropFilter="blur(20px)"
-        px={4}
-        py={3}
-        maxW="85%"
-      >
-        <Text
-          fontSize="sm"
-          fontFamily={FontScheme.body}
-          color={textColor}
-          opacity={0.9}
-          lineHeight="1.6"
-          whiteSpace="pre-wrap"
-        >
-          {message.content}
-          {isStreaming && message.content.length === 0 ? "…" : null}
-        </Text>
-      </Box>
-    </HStack>
-  );
-}
-
-interface BotChatProps {
+interface LiveBotDialogProps {
   onClose: () => void;
+  /**
+   * When true, the dialog should attempt to auto-start the session on
+   * mount. Set by the window-event handler so visitors landing here from
+   * the About section don't have to click twice.
+   */
+  autoStart: boolean;
 }
 
-function BotChat({ onClose }: BotChatProps) {
+function LiveBotDialog({ onClose, autoStart }: LiveBotDialogProps) {
   const cardBorder = useColorModeValue(
     ColorScheme.light.cardBorder,
     ColorScheme.dark.cardBorder,
@@ -208,801 +99,467 @@ function BotChat({ onClose }: BotChatProps) {
     ColorScheme.light.primary,
     ColorScheme.dark.primary,
   );
-  const inputBg = useColorModeValue(
-    "rgba(0,0,0,0.02)",
-    "rgba(255,255,255,0.04)",
+  const bubbleBg = useColorModeValue(
+    "rgba(0,0,0,0.035)",
+    "rgba(255,255,255,0.05)",
   );
-  const sendButtonColor = useColorModeValue("white", "#0a0a0a");
+  const bubbleBorder = useColorModeValue(
+    "rgba(0,0,0,0.08)",
+    "rgba(255,255,255,0.08)",
+  );
+  const startButtonText = useColorModeValue("white", "#0a0a0a");
 
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const [draft, setDraft] = useState("");
-  const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
-  // Phase 4 — Live mode is optional and gated behind a build-time flag so
-  // the feature can be toggled off in prod without a redeploy. When the
-  // flag is off the toggle isn't rendered at all and the drawer behaves
-  // exactly like Phase 3.
-  const liveModeAvailable =
-    process.env.NEXT_PUBLIC_BOT_LIVE_MODE_ENABLED === "true";
-  const [mode, setMode] = useState<"text" | "live">("text");
-  // Holds the id of the assistant bubble currently being streamed by the
-  // Live session, so outputTranscription deltas append to the right
-  // message.
-  const liveAssistantIdRef = useRef<string | null>(null);
+  const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
+  const assistantTurnIdRef = useRef<string | null>(null);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
-  const streamingIdRef = useRef<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const listEndRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
-  // Always-fresh snapshot of `messages` so voice callbacks (which close over
-  // the first render's state) can read the up-to-date history without being
-  // re-bound every turn.
-  const messagesRef = useRef<ChatMessage[]>(messages);
-  useEffect(() => {
-    messagesRef.current = messages;
-  }, [messages]);
-
-  // Latency probe for Phase 3 exit criteria: stamp the moment the browser
-  // tells us the visitor has stopped speaking, then diff against the first
-  // audio byte landing from /api/bot/speak. Logged (dev only) as a single
-  // console line — target is < 2s.
-  const speechEndAtRef = useRef<number | null>(null);
-
-  const playback = useVoicePlayback({
-    muted,
-    onFirstAudioByte: () => {
-      const t0 = speechEndAtRef.current;
-      if (t0 == null) return;
-      speechEndAtRef.current = null;
-      const elapsed = performance.now() - t0;
-      if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
-        console.info(
-          `[bot] speech-end → first audio byte: ${elapsed.toFixed(0)}ms`,
-        );
-      }
-    },
-  });
-  // Keep a ref to the live playback handle so `submitMessage` (a stable
-  // callback) can always reach the latest version without listing the whole
-  // playback object as a dependency.
-  const playbackRef = useRef(playback);
-  useEffect(() => {
-    playbackRef.current = playback;
-  }, [playback]);
-
-  // Keep the message list pinned to the latest content, including while the
-  // assistant response is still streaming in.
-  useEffect(() => {
-    listEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
-
-  // Focus the input when the drawer mounts so visitors can start typing
-  // without an extra click.
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-    return () => {
-      cancelAnimationFrame(id);
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  const submitMessage = useCallback(
-    async (text: string) => {
-      const trimmed = text.trim();
-      if (!trimmed || isSending) return;
-      if (trimmed.length > MAX_USER_MESSAGE_CHARS) {
-        setError(
-          `Please keep messages under ${MAX_USER_MESSAGE_CHARS} characters.`,
-        );
-        return;
-      }
-
-      setError(null);
-      setIsSending(true);
-
-      const userMessage: ChatMessage = {
-        id: makeId(),
-        role: "user",
-        content: trimmed,
-      };
-      const assistantId = makeId();
-      streamingIdRef.current = assistantId;
-
-      // New turn — reset the playback cursor and stop any lingering audio
-      // from the previous answer.
-      playbackRef.current.reset();
-
-      // Snapshot the outgoing conversation (user turn included) so the server
-      // gets a consistent history even though React state updates are async.
-      const outgoing = [...messagesRef.current, userMessage].map(
-        ({ role, content }) => ({ role, content }),
-      );
-
-      setMessages((prev) => [
-        ...prev,
-        userMessage,
-        { id: assistantId, role: "assistant", content: "" },
-      ]);
-
-      const controller = new AbortController();
-      abortRef.current = controller;
-
-      try {
-        const response = await fetch("/api/bot/chat", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: outgoing }),
-          signal: controller.signal,
-        });
-
-        if (!response.ok || !response.body) {
-          const payload = await response
-            .json()
-            .catch(() => ({ error: `Request failed (${response.status})` }));
-          throw new Error(
-            payload.error ?? `Request failed (${response.status})`,
-          );
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let streamed = "";
-
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          if (!chunk) continue;
-          streamed += chunk;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId ? { ...m, content: streamed } : m,
-            ),
-          );
-          // Feed the cumulative text into the playback hook; it will pick
-          // out any newly-completed sentences and synthesize them.
-          playbackRef.current.enqueue(streamed);
-        }
-
-        // Flush any trailing bytes held by the decoder.
-        const tail = decoder.decode();
-        if (tail) {
-          streamed += tail;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId ? { ...m, content: streamed } : m,
-            ),
-          );
-          playbackRef.current.enqueue(streamed);
-        }
-
-        // Speak anything left over after the last sentence boundary.
-        playbackRef.current.flush();
-      } catch (err) {
-        if ((err as Error).name === "AbortError") {
-          // Drawer was closed mid-stream — leave the partial assistant
-          // message alone, it will disappear with state when the drawer
-          // reopens.
-          return;
-        }
-        const messageText =
-          err instanceof Error ? err.message : "Something went wrong.";
-        setError(messageText);
-        // Drop the empty assistant placeholder so the UI doesn't show an
-        // empty bubble after a failure.
-        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
-      } finally {
-        if (streamingIdRef.current === assistantId) {
-          streamingIdRef.current = null;
-        }
-        abortRef.current = null;
-        setIsSending(false);
-        requestAnimationFrame(() => inputRef.current?.focus());
-      }
-    },
-    [isSending],
-  );
-
-  const sendDraft = useCallback(() => {
-    const trimmed = draft.trim();
-    if (!trimmed) return;
-    setDraft("");
-    void submitMessage(trimmed);
-  }, [draft, submitMessage]);
-
-  // Phase 4 — Gemini Live bidirectional voice. Transcripts get folded into
-  // the same `messages` state the Phase 3 pipeline uses so the chat list
-  // looks the same regardless of which pipeline produced the turn.
   const liveVoice = useLiveVoice({
     muted,
     onUserTranscript: (text) => {
       const trimmed = text.trim();
       if (!trimmed) return;
-      // Drop the initial greeting bubble on the very first live turn so
-      // the conversation reads like a real exchange rather than the bot
-      // talking past a canned opener.
-      setMessages((prev) => {
-        const withoutGreeting =
-          prev.length === 1 &&
-          prev[0]!.role === "assistant" &&
-          prev[0]!.content === GREETING
-            ? []
-            : prev;
-        return [
-          ...withoutGreeting,
-          { id: makeId(), role: "user", content: trimmed },
-        ];
-      });
-      // Prepare a fresh assistant bubble for the bot's reply — Live voice
-      // streams transcript deltas into it as audio plays back.
+      setTranscripts((prev) => [
+        ...prev,
+        { id: makeId(), role: "user", content: trimmed },
+      ]);
+      // Pre-seed an empty assistant turn so subsequent transcript deltas
+      // have somewhere to land.
       const assistantId = makeId();
-      liveAssistantIdRef.current = assistantId;
-      setMessages((prev) => [
+      assistantTurnIdRef.current = assistantId;
+      setTranscripts((prev) => [
         ...prev,
         { id: assistantId, role: "assistant", content: "" },
       ]);
     },
     onBotTranscriptDelta: (delta) => {
-      const id = liveAssistantIdRef.current;
+      const id = assistantTurnIdRef.current;
       if (!id) return;
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === id ? { ...m, content: m.content + delta } : m,
+      setTranscripts((prev) =>
+        prev.map((entry) =>
+          entry.id === id ? { ...entry, content: entry.content + delta } : entry,
         ),
       );
     },
     onTurnComplete: () => {
-      liveAssistantIdRef.current = null;
+      assistantTurnIdRef.current = null;
     },
     onInterrupted: () => {
-      // Server interrupted the bot because the visitor started speaking.
-      // The current assistant bubble stays with whatever text landed; a
-      // new one is created on the next onUserTranscript callback.
-      liveAssistantIdRef.current = null;
+      // Visitor barged in — drop the placeholder so the next user turn
+      // gets a clean assistant bubble.
+      assistantTurnIdRef.current = null;
     },
   });
 
-  const voice = useVoiceInput({
-    onSpeechEnd: () => {
-      // Stamp the exact moment speech ends — diffed against the first audio
-      // byte in onFirstAudioByte above.
-      speechEndAtRef.current = performance.now();
-    },
-    onFinalTranscript: (transcript) => {
-      // Voice finalised — ship it straight to the chat route. Clear any
-      // interim that might have leaked into the draft first.
-      setDraft("");
-      void submitMessage(transcript);
-    },
-  });
+  // Keep the transcript list pinned to the latest entry as new deltas
+  // arrive.
+  useEffect(() => {
+    transcriptEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [transcripts]);
 
-  const handleMicToggle = useCallback(() => {
-    if (!voice.supported) return;
-    if (voice.listening) {
-      voice.stop();
-      return;
-    }
-    // Starting to listen — silence any bot audio that's still playing so the
-    // two audio streams don't collide and the mic doesn't re-pick up the
-    // bot's own voice.
-    playbackRef.current.stop();
-    voice.start();
-  }, [voice]);
+  const handleStart = useCallback(() => {
+    void liveVoice.start();
+  }, [liveVoice]);
+
+  const handleStop = useCallback(() => {
+    liveVoice.stop();
+    assistantTurnIdRef.current = null;
+  }, [liveVoice]);
 
   const handleMuteToggle = useCallback(() => {
     setMuted((prev) => !prev);
   }, []);
 
-  const handleModeToggle = useCallback(() => {
-    // Leaving Live mode must tear down the session so the mic and
-    // WebSocket don't leak; entering Live mode is a no-op until the
-    // visitor clicks "start".
-    setMode((prev) => {
-      const next = prev === "text" ? "live" : "text";
-      if (prev === "live") {
-        liveVoice.stop();
-        liveAssistantIdRef.current = null;
-      }
-      return next;
-    });
-  }, [liveVoice]);
+  // Optional auto-start: if the caller opened the dialog from the About
+  // section's animated AI button, we try to kick the session off
+  // immediately. The click on that button counts as a user gesture, so
+  // `getUserMedia` and AudioContext resume are allowed.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (autoStart && !autoStartedRef.current) {
+      autoStartedRef.current = true;
+      void liveVoice.start();
+    }
+    // We intentionally do not add `liveVoice.start` to deps — we want
+    // this effect to fire exactly once when the dialog mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart]);
 
-  const handleLiveStart = useCallback(() => {
-    // Stop the Phase 3 playback so the two audio pipelines don't overlap.
-    playbackRef.current.stop();
-    void liveVoice.start();
-  }, [liveVoice]);
+  // Tear everything down whenever the dialog unmounts, mic leaks are no
+  // joke.
+  useEffect(() => {
+    return () => {
+      liveVoice.stop();
+    };
+    // liveVoice.stop is stable per session
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleLiveStop = useCallback(() => {
-    liveVoice.stop();
-    liveAssistantIdRef.current = null;
-  }, [liveVoice]);
-
-  // Keyboard shortcuts, drawer-scoped:
-  //   - Space (when focus is NOT in the textarea) → toggle mic
-  //   - Escape → stop bot playback / cancel recording
-  // The space binding intentionally bypasses the textarea so the visitor can
-  // still type a literal space while drafting a text question.
+  // Keyboard: Esc ends the session AND closes the dialog (Chakra already
+  // handles the close; we add the session teardown).
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        let handled = false;
-        if (mode === "live") {
-          if (liveVoice.status !== "idle") {
-            liveVoice.stop();
-            handled = true;
-          }
-        } else {
-          if (playbackRef.current.speaking) {
-            playbackRef.current.stop();
-            handled = true;
-          }
-          if (voice.listening) {
-            voice.stop();
-            handled = true;
-          }
+        if (liveVoice.status !== "idle") {
+          liveVoice.stop();
         }
-        if (handled) {
-          event.stopPropagation();
-        }
-        return;
-      }
-      if (event.key === " " || event.code === "Space") {
-        const target = event.target as HTMLElement | null;
-        const tag = target?.tagName;
-        if (tag === "TEXTAREA" || tag === "INPUT") return;
-        if (event.repeat) return;
-        if (mode === "live") {
-          // In Live mode Space toggles the whole session, not a
-          // push-to-talk state — the mic is always hot once it's running.
-          event.preventDefault();
-          if (liveVoice.status === "idle" || liveVoice.status === "error") {
-            handleLiveStart();
-          } else {
-            handleLiveStop();
-          }
-          return;
-        }
-        event.preventDefault();
-        handleMicToggle();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [
-    handleMicToggle,
-    voice,
-    mode,
-    liveVoice,
-    handleLiveStart,
-    handleLiveStop,
-  ]);
+  }, [liveVoice]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      sendDraft();
+  const statusCopy = useMemo(() => {
+    switch (liveVoice.status) {
+      case "connecting":
+        return "Connecting to Gemini Live…";
+      case "listening":
+        return liveVoice.speaking
+          ? "Joel's AI is speaking — start talking to interrupt."
+          : "Listening. Just start talking — no need to click anything.";
+      case "error":
+        return "Something went wrong. Tap to try again.";
+      default:
+        return "Ask Joel's AI advocate anything. It's read the whole resume.";
     }
-  };
+  }, [liveVoice.status, liveVoice.speaking]);
 
-  const streamingId = streamingIdRef.current;
-  const streamingAssistantId = isSending ? streamingId : null;
+  const visualizerState =
+    liveVoice.status === "error"
+      ? "error"
+      : liveVoice.status === "connecting"
+        ? "connecting"
+        : liveVoice.status === "listening"
+          ? liveVoice.speaking
+            ? "speaking"
+            : "listening"
+          : "idle";
 
-  // While listening, show the live interim transcript in the textarea so the
-  // visitor can see what's being captured. Falls back to the draft otherwise.
-  const textareaValue = voice.listening
-    ? voice.interimTranscript
-    : draft;
-  const textareaDisabled = isSending || voice.listening;
-  const textareaPlaceholder = voice.listening
-    ? "Listening…"
-    : "Ask about Joel's experience, projects, or fit for a role…";
-
-  const micUnsupportedHint = useMemo(() => {
-    if (voice.supported) return null;
-    return "Voice input isn't available in this browser — you can still type.";
-  }, [voice.supported]);
-
-  const voiceError = voice.error;
+  const sessionActive =
+    liveVoice.status === "listening" || liveVoice.status === "connecting";
 
   return (
     <>
-      <DrawerHeader
+      {/* === Header ======================================== */}
+      <Flex
+        alignItems="center"
+        justifyContent="space-between"
+        px={{ base: 5, md: 7 }}
+        py={4}
         borderBottom="1px solid"
         borderColor={cardBorder}
-        px={6}
-        py={4}
       >
-        <Flex alignItems="center" justifyContent="space-between">
-          <HStack spacing={3}>
-            <Flex
-              w={9}
-              h={9}
-              borderRadius="full"
-              alignItems="center"
-              justifyContent="center"
-              border="1px solid"
-              borderColor={primaryColor}
-              color={primaryColor}
+        <HStack spacing={3}>
+          <Flex
+            w={9}
+            h={9}
+            borderRadius="full"
+            alignItems="center"
+            justifyContent="center"
+            border="1px solid"
+            borderColor={primaryColor}
+            color={primaryColor}
+          >
+            <Icon as={BsStars} fontSize="md" />
+          </Flex>
+          <Box>
+            <Text
+              fontSize="sm"
+              fontWeight="semibold"
+              fontFamily={FontScheme.body}
+              color={textColor}
+              lineHeight="1.2"
             >
-              <Icon as={BsStars} fontSize="md" />
-            </Flex>
-            <Box>
-              <Text
-                fontSize="sm"
-                fontWeight="semibold"
-                fontFamily={FontScheme.body}
-                color={textColor}
-                lineHeight="1.2"
-              >
-                Joel&apos;s AI advocate
-              </Text>
+              Joel&apos;s AI advocate
+            </Text>
+            <HStack spacing={2} mt={0.5}>
+              <Box
+                w={1.5}
+                h={1.5}
+                borderRadius="full"
+                bg={
+                  liveVoice.status === "listening"
+                    ? primaryColor
+                    : liveVoice.status === "error"
+                      ? "red.400"
+                      : "gray.400"
+                }
+                animation={
+                  sessionActive
+                    ? `${pulseRing} 1.8s ease-out infinite`
+                    : undefined
+                }
+              />
               <Text
                 fontSize="xs"
                 fontFamily={FontScheme.body}
                 color={textColor}
-                opacity={0.5}
+                opacity={0.55}
               >
-                Grounded in Joel&apos;s portfolio. Not Joel himself.
+                Live voice · grounded in Joel&apos;s portfolio
               </Text>
-            </Box>
-          </HStack>
-          <HStack spacing={1}>
-            {liveModeAvailable ? (
-              <Tooltip
-                label={
-                  mode === "live"
-                    ? "Switch to text chat"
-                    : "Switch to live voice"
-                }
-                openDelay={300}
-              >
-                <IconButton
-                  aria-label={
-                    mode === "live"
-                      ? "Switch to text chat"
-                      : "Switch to live voice"
-                  }
-                  aria-pressed={mode === "live"}
-                  icon={
-                    <Icon
-                      as={mode === "live" ? BsChatDots : BsBroadcast}
-                      fontSize="md"
-                    />
-                  }
-                  variant="ghost"
-                  size="sm"
-                  color={mode === "live" ? primaryColor : undefined}
-                  onClick={handleModeToggle}
-                />
-              </Tooltip>
-            ) : null}
-            <Tooltip
-              label={muted ? "Unmute voice" : "Mute voice"}
-              openDelay={300}
-            >
-              <IconButton
-                aria-label={muted ? "Unmute bot voice" : "Mute bot voice"}
-                aria-pressed={muted}
-                icon={
-                  <Icon
-                    as={muted ? BsVolumeMuteFill : BsVolumeUpFill}
-                    fontSize="md"
-                  />
-                }
-                variant="ghost"
-                size="sm"
-                onClick={handleMuteToggle}
-              />
-            </Tooltip>
-            <IconButton
-              aria-label="Close chat"
-              icon={<CloseIcon boxSize={3} />}
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-            />
-          </HStack>
-        </Flex>
-      </DrawerHeader>
+            </HStack>
+          </Box>
+        </HStack>
 
-      <DrawerBody px={{ base: 4, md: 6 }} py={5}>
-        <VStack
-          spacing={4}
-          align="stretch"
-          aria-live="polite"
-          aria-label="Chat messages"
-        >
-          {messages.map((m) => (
-            <MessageBubble
-              key={m.id}
-              message={m}
-              isStreaming={m.id === streamingId}
-              isSpeaking={
-                playback.speaking && m.id === streamingAssistantId
-              }
-            />
-          ))}
-          <div ref={listEndRef} />
-        </VStack>
-      </DrawerBody>
-
-      <DrawerFooter
-        borderTop="1px solid"
-        borderColor={cardBorder}
-        flexDirection="column"
-        alignItems="stretch"
-        px={{ base: 4, md: 6 }}
-        py={4}
-        gap={2}
-      >
-        {error ? (
-          <Text fontSize="xs" color="red.400" fontFamily={FontScheme.body}>
-            {error}
-          </Text>
-        ) : null}
-        {mode === "text" && voiceError ? (
-          <Text fontSize="xs" color="red.400" fontFamily={FontScheme.body}>
-            Voice input error: {voiceError}
-          </Text>
-        ) : null}
-        {mode === "text" && micUnsupportedHint ? (
-          <Text
-            fontSize="xs"
-            color={textColor}
-            opacity={0.55}
-            fontFamily={FontScheme.body}
-          >
-            {micUnsupportedHint}
-          </Text>
-        ) : null}
-        {mode === "live" && liveVoice.error ? (
-          <Text fontSize="xs" color="red.400" fontFamily={FontScheme.body}>
-            Live voice error: {liveVoice.error}
-          </Text>
-        ) : null}
-        {mode === "live" ? (
-          <VStack align="stretch" spacing={2}>
-            <Text
-              fontSize="xs"
-              color={textColor}
-              opacity={0.55}
-              fontFamily={FontScheme.body}
-              textAlign="center"
-            >
-              {liveVoice.status === "listening"
-                ? "Live — just start talking. Press Esc or Stop when you're done."
-                : liveVoice.status === "connecting"
-                  ? "Connecting to Gemini Live…"
-                  : "Live voice uses Gemini's bidirectional audio — lower latency and barge-in. Tap to start."}
-            </Text>
-            <Flex justifyContent="center">
-              {liveVoice.status === "idle" ||
-              liveVoice.status === "error" ? (
-                <Box
-                  as="button"
-                  onClick={handleLiveStart}
-                  aria-label="Start live voice conversation"
-                  display="inline-flex"
-                  alignItems="center"
-                  gap={2}
-                  px={5}
-                  py={3}
-                  bg={primaryColor}
-                  color={sendButtonColor}
-                  borderRadius="full"
-                  fontFamily={FontScheme.body}
-                  fontSize="sm"
-                  fontWeight="medium"
-                  cursor="pointer"
-                  transition="all 0.2s ease"
-                  _hover={{ opacity: 0.9 }}
-                >
-                  <Icon as={BsBroadcast} />
-                  Start live conversation
-                </Box>
-              ) : (
-                <Box
-                  as="button"
-                  onClick={handleLiveStop}
-                  aria-label="Stop live voice conversation"
-                  display="inline-flex"
-                  alignItems="center"
-                  gap={2}
-                  px={5}
-                  py={3}
-                  bg="transparent"
-                  color={primaryColor}
-                  border="1px solid"
-                  borderColor={primaryColor}
-                  borderRadius="full"
-                  fontFamily={FontScheme.body}
-                  fontSize="sm"
-                  fontWeight="medium"
-                  cursor="pointer"
-                  transition="all 0.2s ease"
-                  _hover={{ opacity: 0.85 }}
-                  animation={
-                    liveVoice.status === "listening"
-                      ? `${pulseRing} 1.4s ease-out infinite`
-                      : undefined
-                  }
-                >
-                  <Icon
-                    as={
-                      liveVoice.status === "listening"
-                        ? BsStopFill
-                        : BsMicFill
-                    }
-                  />
-                  {liveVoice.status === "listening"
-                    ? "Stop"
-                    : "Connecting…"}
-                </Box>
-              )}
-            </Flex>
-          </VStack>
-        ) : (
-        <HStack align="flex-end" spacing={3}>
-          <Textarea
-            ref={inputRef}
-            value={textareaValue}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={textareaPlaceholder}
-            rows={2}
-            resize="none"
-            bg={inputBg}
-            border="1px solid"
-            borderColor={voice.listening ? primaryColor : cardBorder}
-            fontSize="sm"
-            fontFamily={FontScheme.body}
-            _focus={{ borderColor: primaryColor, boxShadow: "none" }}
-            maxLength={MAX_USER_MESSAGE_CHARS}
-            aria-label="Message"
-            isDisabled={textareaDisabled}
-          />
+        <HStack spacing={1}>
           <Tooltip
-            label={
-              voice.supported
-                ? voice.listening
-                  ? "Stop listening (Space / Esc)"
-                  : "Hold Space or click to talk"
-                : "Voice input not supported in this browser"
-            }
+            label={muted ? "Unmute voice" : "Mute voice"}
             openDelay={300}
           >
             <IconButton
-              aria-label={
-                voice.listening ? "Stop voice input" : "Start voice input"
-              }
-              aria-pressed={voice.listening}
+              aria-label={muted ? "Unmute bot voice" : "Mute bot voice"}
+              aria-pressed={muted}
               icon={
                 <Icon
-                  as={voice.listening ? BsMicMuteFill : BsMicFill}
+                  as={muted ? BsVolumeMuteFill : BsVolumeUpFill}
                   fontSize="md"
                 />
               }
-              onClick={handleMicToggle}
-              isDisabled={!voice.supported || isSending}
-              variant="outline"
-              borderColor={voice.listening ? primaryColor : cardBorder}
-              color={voice.listening ? primaryColor : textColor}
-              bg={voice.listening ? "transparent" : inputBg}
-              animation={
-                voice.listening
-                  ? `${pulseRing} 1.4s ease-out infinite`
-                  : undefined
-              }
-              _hover={{ borderColor: primaryColor }}
-              borderRadius="lg"
+              variant="ghost"
+              size="sm"
+              onClick={handleMuteToggle}
             />
           </Tooltip>
           <IconButton
-            aria-label="Send message"
-            icon={<Icon as={BsSend} />}
-            onClick={sendDraft}
-            isLoading={isSending}
-            isDisabled={draft.trim().length === 0 || voice.listening}
-            bg={primaryColor}
-            color={sendButtonColor}
-            _hover={{ opacity: 0.85 }}
-            borderRadius="lg"
+            aria-label="Close dialog"
+            icon={<CloseIcon boxSize={3} />}
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
           />
         </HStack>
+      </Flex>
+
+      {/* === Visualizer ==================================== */}
+      <Box
+        position="relative"
+        px={{ base: 4, md: 8 }}
+        pt={{ base: 6, md: 10 }}
+        pb={{ base: 4, md: 6 }}
+      >
+        <Box
+          w="100%"
+          h={{ base: "240px", md: "300px" }}
+          position="relative"
+        >
+          <BotVisualizer
+            state={visualizerState}
+            getOutputAnalyser={liveVoice.getOutputAnalyser}
+            getInputAnalyser={liveVoice.getInputAnalyser}
+          />
+        </Box>
+
+        <Text
+          mt={4}
+          textAlign="center"
+          fontSize="sm"
+          fontFamily={FontScheme.body}
+          color={textColor}
+          opacity={0.72}
+          px={4}
+        >
+          {statusCopy}
+        </Text>
+
+        {liveVoice.error ? (
+          <Text
+            mt={2}
+            textAlign="center"
+            fontSize="xs"
+            color="red.400"
+            fontFamily={FontScheme.body}
+          >
+            {liveVoice.error}
+          </Text>
+        ) : null}
+      </Box>
+
+      {/* === Transcripts ==================================== */}
+      <Box
+        mx={{ base: 4, md: 8 }}
+        mb={4}
+        border="1px solid"
+        borderColor={bubbleBorder}
+        borderRadius="xl"
+        bg={bubbleBg}
+        maxH={{ base: "140px", md: "160px" }}
+        overflowY="auto"
+        px={4}
+        py={3}
+      >
+        {transcripts.length === 0 ? (
+          <Text
+            fontSize="xs"
+            fontFamily={FontScheme.body}
+            color={textColor}
+            opacity={0.45}
+            textAlign="center"
+          >
+            Transcripts will appear here as you talk.
+          </Text>
+        ) : (
+          <VStack align="stretch" spacing={2}>
+            {transcripts.map((entry) => (
+              <Box key={entry.id}>
+                <Text
+                  fontSize="10px"
+                  textTransform="uppercase"
+                  letterSpacing="0.08em"
+                  fontFamily={FontScheme.body}
+                  color={entry.role === "user" ? textColor : primaryColor}
+                  opacity={0.55}
+                  mb={0.5}
+                >
+                  {entry.role === "user" ? "You" : "Joel's AI"}
+                </Text>
+                <Text
+                  fontSize="sm"
+                  fontFamily={FontScheme.body}
+                  color={textColor}
+                  opacity={0.9}
+                  lineHeight="1.55"
+                  whiteSpace="pre-wrap"
+                >
+                  {entry.content || "…"}
+                </Text>
+              </Box>
+            ))}
+            <div ref={transcriptEndRef} />
+          </VStack>
         )}
-      </DrawerFooter>
+      </Box>
+
+      {/* === Primary action ================================= */}
+      <Flex
+        justifyContent="center"
+        alignItems="center"
+        pb={{ base: 6, md: 8 }}
+      >
+        {sessionActive ? (
+          <MotionBox
+            as="button"
+            onClick={handleStop}
+            aria-label="Stop live voice conversation"
+            display="inline-flex"
+            alignItems="center"
+            gap={2}
+            px={6}
+            py={3}
+            bg="transparent"
+            color={primaryColor}
+            border="1px solid"
+            borderColor={primaryColor}
+            borderRadius="full"
+            fontFamily={FontScheme.body}
+            fontSize="sm"
+            fontWeight="medium"
+            cursor="pointer"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            animation={
+              liveVoice.status === "listening"
+                ? `${pulseRing} 1.8s ease-out infinite`
+                : undefined
+            }
+          >
+            <Icon as={liveVoice.speaking ? BsStopFill : BsMicFill} />
+            {liveVoice.status === "connecting" ? "Connecting…" : "Stop"}
+          </MotionBox>
+        ) : (
+          <MotionBox
+            as="button"
+            onClick={handleStart}
+            aria-label="Start live voice conversation"
+            display="inline-flex"
+            alignItems="center"
+            gap={2}
+            px={7}
+            py={3.5}
+            bg={primaryColor}
+            color={startButtonText}
+            borderRadius="full"
+            fontFamily={FontScheme.body}
+            fontSize="sm"
+            fontWeight="semibold"
+            cursor="pointer"
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            boxShadow={`0 18px 40px -18px ${primaryColor}`}
+          >
+            <Icon as={BsBroadcast} />
+            {liveVoice.status === "error"
+              ? "Try again"
+              : "Start conversation"}
+          </MotionBox>
+        )}
+      </Flex>
     </>
   );
 }
 
 export default function BotLauncher() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const btnRef = useRef<HTMLButtonElement | null>(null);
 
-  const primaryColor = useColorModeValue(
-    ColorScheme.light.primary,
-    ColorScheme.dark.primary,
-  );
   const drawerBg = useColorModeValue(
     ColorScheme.light.bg,
     ColorScheme.dark.bg,
   );
-  const buttonText = useColorModeValue("white", "#0a0a0a");
 
-  // Feature flag — mounted once at the root of the page. When the flag is
-  // off we render nothing so the feature is completely invisible (and the
-  // /api/bot/chat route returns 404 on the server side for defence-in-depth).
+  // The floating "Ask AI" button is gone — the only entry point now is
+  // the animated advocate button in the About section, which dispatches
+  // OPEN_BOT_EVENT. We auto-start the session on every open because the
+  // dispatching click counts as a user gesture.
+  const [autoStart, setAutoStart] = useState(false);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      // Dispatch detail is reserved but unused — every open is live.
+      void (event as CustomEvent<OpenBotDetail>).detail;
+      setAutoStart(true);
+      onOpen();
+    };
+    window.addEventListener(OPEN_BOT_EVENT, handler as EventListener);
+    return () => {
+      window.removeEventListener(OPEN_BOT_EVENT, handler as EventListener);
+    };
+  }, [onOpen]);
+
+  // Feature flag — when NEXT_PUBLIC_BOT_ENABLED is off we render nothing,
+  // so the whole surface is invisible (and /api/bot/live-token returns
+  // 404 on the server side for defence-in-depth).
   if (process.env.NEXT_PUBLIC_BOT_ENABLED !== "true") {
     return null;
   }
 
   const handleClose = () => {
     onClose();
-    requestAnimationFrame(() => {
-      btnRef.current?.focus({ preventScroll: true });
-    });
+    setAutoStart(false);
   };
 
   return (
-    <>
-      <MotionBox
-        position="fixed"
-        bottom={{ base: 5, md: 8 }}
-        right={{ base: 5, md: 8 }}
-        zIndex={1000}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size={{ base: "full", md: "xl" }}
+      isCentered
+      returnFocusOnClose={false}
+    >
+      <ModalOverlay backdropFilter="blur(8px)" bg="blackAlpha.600" />
+      <ModalContent
+        bg={drawerBg}
+        fontFamily={FontScheme.body}
+        borderRadius={{ base: 0, md: "2xl" }}
+        overflow="hidden"
+        mx={{ base: 0, md: 4 }}
       >
-        <Box
-          as="button"
-          ref={btnRef}
-          onClick={onOpen}
-          aria-label="Ask Joel's AI advocate"
-          display="inline-flex"
-          alignItems="center"
-          gap={2}
-          px={5}
-          py={3}
-          bg={primaryColor}
-          color={buttonText}
-          borderRadius="full"
-          fontFamily={FontScheme.body}
-          fontSize="sm"
-          fontWeight="medium"
-          cursor="pointer"
-          boxShadow="0 10px 30px rgba(0,0,0,0.15)"
-          transition="all 0.2s ease"
-          _hover={{ transform: "translateY(-2px)", opacity: 0.92 }}
-          _focusVisible={{
-            outline: "2px solid",
-            outlineColor: primaryColor,
-            outlineOffset: "3px",
-          }}
-        >
-          <Icon as={BsStars} />
-          Ask AI
-        </Box>
-      </MotionBox>
-
-      <Drawer
-        isOpen={isOpen}
-        placement="right"
-        onClose={handleClose}
-        size={{ base: "full", md: "md" }}
-        returnFocusOnClose={false}
-      >
-        <DrawerOverlay backdropFilter="blur(4px)" />
-        <DrawerContent bg={drawerBg} fontFamily={FontScheme.body}>
-          <BotChat onClose={handleClose} />
-        </DrawerContent>
-      </Drawer>
-    </>
+        <Stack spacing={0}>
+          <LiveBotDialog onClose={handleClose} autoStart={autoStart} />
+        </Stack>
+      </ModalContent>
+    </Modal>
   );
 }
