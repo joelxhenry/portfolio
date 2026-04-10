@@ -14,6 +14,7 @@ import AboutMe from "./sections/about";
 import Skills from "./sections/skills";
 import ContactForm from "./sections/contact";
 import Footer from "./sections/footer";
+import BotLauncher from "./sections/bot-launcher";
 
 export default function Home() {
   const { colorMode } = useColorMode();
@@ -62,6 +63,8 @@ export default function Home() {
       </Container>
 
       <Footer />
+
+      <BotLauncher />
 
       {loaded ? (
         <AnimatedCursor
