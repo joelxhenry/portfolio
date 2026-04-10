@@ -19,9 +19,23 @@ import { buildSystemInstruction } from '@/app/lib/bot/prompt';
 
 export const runtime = 'nodejs';
 
-// Gemini Live model ID. Documented in the @google/genai SDK's own examples
-// (see the `ai.live.connect` snippet in dist/genai.d.ts).
-const MODEL = 'gemini-live-2.5-flash-preview';
+// Gemini Live model ID. The installed @google/genai@1.49.0 SDK's own
+// docstring example references `gemini-live-2.5-flash-preview`, but as of
+// late 2025 that preview name has been rotated out of Google's model
+// registry — attempting to connect with it returns "models/... is not
+// found for API version v1main, or is not supported for
+// bidiGenerateContent" over the WebSocket.
+//
+// `gemini-2.0-flash-live-001` is the GA half-cascade Live model and is
+// the most stable choice for a portfolio site (no preview-rotation risk).
+// If you want the newer 2.5-era Live preview, candidates to try — all are
+// still in preview and subject to the same rotation:
+//   - gemini-2.5-flash-preview-native-audio-dialog
+//   - gemini-2.5-flash-exp-native-audio-thinking-dialog
+// Verify what's live on your key by running:
+//   curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY" \
+//     | jq '.models[] | select(.supportedGenerationMethods[]? == "bidiGenerateContent") | .name'
+const MODEL = 'gemini-2.0-flash-live-001';
 // Prebuilt Live voice — the SDK ships "Charon" as a warm, mid-range option.
 // Chosen to match the Chirp3-HD pick in /api/bot/speak (Phase 3) so the bot
 // sounds the same across both pipelines during the Phase 4 A/B.
