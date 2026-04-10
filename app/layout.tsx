@@ -27,6 +27,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Secure Privacy consent manager. Loaded in <head> with a
+            plain script tag so it's blocking and runs before any
+            tracking-adjacent code (e.g. GA4 below) — that's how a
+            consent manager is expected to integrate. */}
+        <script
+          src="https://app.secureprivacy.ai/script/69d92b7eec43ec9a8266b4e7.js"
+          async
+        />
+      </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
         {/* Google Analytics 4 — loaded only when the measurement ID is
