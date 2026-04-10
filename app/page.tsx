@@ -39,10 +39,7 @@ export default function Home() {
         >
           <Header />
         </Box>
-
-
       </Box>
-      <Skills />
 
       <Container id="about" group={true}>
         <Box pt={10}>
@@ -50,7 +47,7 @@ export default function Home() {
         </Box>
       </Container>
 
-
+      <Skills />
 
       <Container id="projects" group={true}>
         <Box>
@@ -73,11 +70,11 @@ export default function Home() {
           color={
             colorMode === "light"
               ? hexRgb(ColorScheme.light.primary, { format: "array" })
-                .slice(0, -1)
-                .join(", ")
+                  .slice(0, -1)
+                  .join(", ")
               : hexRgb(ColorScheme.dark.primary, { format: "array" })
-                .slice(0, -1)
-                .join(", ")
+                  .slice(0, -1)
+                  .join(", ")
           }
           outerAlpha={0.1}
           innerScale={1}
