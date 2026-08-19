@@ -36,7 +36,7 @@ const projects: ProjectInterface[] = [
     preview_link: "https://harmoncommerce.com/",
     // Paste your YouTube or Loom share URL here once the demo is recorded —
     // it renders as an inline player on the card automatically.
-    // video_link: "https://www.youtube.com/watch?v=XXXXXXXXXXX",
+    video_link: "https://www.loom.com/share/6bb17dfc82af4a0cb387782e753b1b29",
     stack: ["Vendure", "TypeScript", "Next.js", "Payload CMS", "GraphQL", "TailwindCSS"],
   },
   {
