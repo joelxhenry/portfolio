@@ -3,45 +3,67 @@ import {
   Box,
   Image,
   Heading,
+  Text,
   useColorModeValue,
-  HStack,
+  Wrap,
+  WrapItem,
   Button,
-  List,
-  ListIcon,
-  SimpleGrid,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  useBreakpointValue,
-  PlacementWithLogical,
+  ButtonGroup,
   Stack,
+  Flex,
 } from "@chakra-ui/react";
 import projects, { ProjectInterface } from "../content/projects";
 import ColorScheme from "../assets/colors";
-import { Content } from "./header";
+import FontScheme from "../assets/fonts";
 import {
-  BsArrowRight,
+  BsCameraVideoFill,
   BsCodeSlash,
   BsPencilFill,
   BsPlayFill,
 } from "react-icons/bs";
-// Note: these icons used to come from @icon-park/react, which generates
-// random IDs for its internal SVG clipPath definitions on every render.
-// That produced a hydration mismatch under Next.js SSR ("Prop `clipPath`
-// did not match"). react-icons renders deterministic SVG and matches the
-// icon language used elsewhere on the site.
+// Note: icons come from react-icons (deterministic SVG) rather than
+// @icon-park/react, whose random clipPath IDs caused SSR hydration
+// mismatches under Next.js. Keep new icons on react-icons too.
 
-function Project({ project }: { project: ProjectInterface }) {
-  const placement = useBreakpointValue<PlacementWithLogical>({
-    base: "bottom",
-    lg: "right",
-  });
+// Converts a YouTube or Loom share URL into its embeddable player URL.
+// Returns null for anything unrecognized so the card falls back to a plain
+// "Watch demo" link button instead of embedding an untrusted iframe src.
+function toEmbedUrl(url: string): string | null {
+  const yt = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/
+  );
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
 
-  const trigger = useBreakpointValue<any>({
-    base: undefined,
-    lg: "hover",
-  });
+  const loom = url.match(/loom\.com\/(?:share|embed)\/([\w-]+)/);
+  if (loom) return `https://www.loom.com/embed/${loom[1]}`;
 
+  return null;
+}
+
+function StackTag({ label }: { label: string }) {
+  return (
+    <WrapItem>
+      <Box
+        textTransform={"uppercase"}
+        whiteSpace={"nowrap"}
+        fontSize={"10px"}
+        fontWeight={"bold"}
+        py={"2px"}
+        px={3}
+        borderRadius={"full"}
+        color={useColorModeValue(ColorScheme.light.text, ColorScheme.dark.text)}
+        bg={useColorModeValue(
+          ColorScheme.light.secondary,
+          ColorScheme.dark.secondary
+        )}
+      >
+        {label}
+      </Box>
+    </WrapItem>
+  );
+}
+
+function ProjectRow({ project }: { project: ProjectInterface }) {
   const cardBg = useColorModeValue(
     ColorScheme.light.cardBg,
     ColorScheme.dark.cardBg
@@ -50,166 +72,176 @@ function Project({ project }: { project: ProjectInterface }) {
     ColorScheme.light.cardBorder,
     ColorScheme.dark.cardBorder
   );
+  const primary = useColorModeValue(
+    ColorScheme.light.primary,
+    ColorScheme.dark.primary
+  );
+  const imageBg = useColorModeValue(
+    ColorScheme.light.secondary,
+    ColorScheme.dark.secondary
+  );
+
+  // Descriptions may contain a blank-line-separated aside (e.g. the demo
+  // credentials on Harmon). Render each block as its own paragraph so the
+  // structure survives instead of collapsing into one run of text.
+  const paragraphs = project.description
+    .split(/\n\s*\n/)
+    .map((block) => block.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const videoEmbed = project.video_link ? toEmbedUrl(project.video_link) : null;
 
   return (
-    <Stack
-      flexDirection={"row"}
-      spacing={3}
-      width={{ base: "full", lg: "75%" }}
+    <Flex
+      as="article"
+      direction={{ base: "column", md: "row" }}
+      bg={cardBg}
+      border="1px solid"
+      borderColor={cardBorder}
+      borderRadius="2xl"
+      overflow="hidden"
+      transition="ease .25s"
+      _hover={{ borderColor: primary }}
     >
       <Box
-        position={"relative"}
-        display={{ base: "none", md: "flex" }}
-        alignItems={"center"}
-        justifyContent={"center"}
-        aspectRatio={1}
-        overflow={"hidden"}
-        width={"25%"}
-        rounded={12}
-        border="1px solid"
-        borderColor={cardBorder}
+        flexShrink={0}
+        width={{ base: "full", md: "260px" }}
+        bg={imageBg}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        aspectRatio={{ base: 16 / 9, md: "auto" }}
       >
-        <Image width={"full"} src={project.image} alt={project.title} />
+        <Image
+          src={project.image}
+          alt={project.title}
+          width="full"
+          height="full"
+          objectFit="cover"
+        />
       </Box>
-      <Popover trigger={trigger} placement={placement}>
-        <PopoverTrigger>
-          <Stack
-            w={"full"}
-            justifyContent={"center"}
-            p={{ base: 3, md: 5 }}
-            borderRadius="xl"
-            _hover={{
-              bg: cardBg,
-              borderColor: useColorModeValue(
-                ColorScheme.light.primary,
-                "rgba(200, 230, 78, 0.2)"
-              ),
-            }}
-            border="1px solid"
-            borderColor="transparent"
-            transition={"ease .25s"}
-          >
-            <Heading fontSize={{ base: "md", md: "lg" }}>
-              <Box
-                as="span"
-                position={"relative"}
-                color={useColorModeValue(
-                  ColorScheme.light.primary,
-                  ColorScheme.dark.primary
-                )}
-              >
-                {project.title}
-              </Box>
-            </Heading>
-            <Stack flexDirection={"row"}>
-              {project.preview_link && (
-                <Button
-                  href={project.preview_link}
-                  target="_blank"
-                  as={"a"}
-                  rounded="lg"
-                  size={"sm"}
-                  textAlign={"end"}
-                >
-                  Preview{" "}
-                  <Box pl={2} as="span">
-                    {" "}
-                    <BsPlayFill />
-                  </Box>
-                </Button>
-              )}
 
-              {project.source_code_link && (
-                <Button
-                  href={project.source_code_link}
-                  as={"a"}
-                  target="_blank"
-                  rounded="lg"
-                  size={"sm"}
-                  variant={"ghost"}
-                >
-                  Source Code
-                  <Box pl={2} as="span">
-                    {" "}
-                    <BsCodeSlash />
-                  </Box>
-                </Button>
-              )}
+      <Stack flex={1} p={{ base: 5, md: 6 }} spacing={4}>
+        <Heading fontSize={{ base: "lg", md: "xl" }} color={primary}>
+          {project.title}
+        </Heading>
 
-              {project.blog_link && (
-                <Button
-                  href={project.blog_link}
-                  as={"a"}
-                  target="_blank"
-                  rounded="lg"
-                  size={"sm"}
-                  variant={"ghost"}
-                >
-                  Read Post
-                  <Box pl={2} as="span">
-                    {" "}
-                    <BsPencilFill />
-                  </Box>
-                </Button>
-              )}
-            </Stack>
-          </Stack>
-        </PopoverTrigger>
+        <Stack spacing={2}>
+          {paragraphs.map((block, i) => (
+            <Text
+              key={i}
+              fontFamily={FontScheme.body}
+              fontSize={"15px"}
+              opacity={i === 0 ? 0.85 : 0.6}
+            >
+              {block}
+            </Text>
+          ))}
+        </Stack>
 
-        <PopoverContent
-          bg={useColorModeValue(ColorScheme.light.bg, ColorScheme.dark.bg)}
-          border="1px solid"
-          borderColor={cardBorder}
-          borderRadius="xl"
-          p={5}
-        >
+        {videoEmbed && (
           <Box
-            position={"relative"}
-            display={{ base: "flex", md: "none" }}
-            alignItems={"center"}
-            justifyContent={"center"}
-            aspectRatio={1}
-            overflow={"hidden"}
-            rounded={10}
-            mb={5}
+            position="relative"
+            width="full"
+            borderRadius="lg"
+            overflow="hidden"
+            border="1px solid"
+            borderColor={cardBorder}
+            sx={{ aspectRatio: "16 / 9" }}
           >
-            <Image width={"full"} src={project.image} alt={project.title} />
+            <Box
+              as="iframe"
+              src={videoEmbed}
+              title={`${project.title} demo video`}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              position="absolute"
+              top={0}
+              left={0}
+              width="full"
+              height="full"
+              border="0"
+            />
           </Box>
-          <Box mb={5}>
-            <Heading fontSize={"md"} mb={2}>
-              Overview
-            </Heading>
-            <Content>{project.description}</Content>
-          </Box>
-          <Box my={2}>
-            <Heading fontSize={"md"} mb={2}>
-              Tools
-            </Heading>
-            <List>
-              {project.stack.map((tool, i) => (
-                <HStack gap={2} key={i}>
-                  <ListIcon as={BsArrowRight} />
-                  <Box>{tool}</Box>
-                </HStack>
-              ))}
-            </List>
-          </Box>
-        </PopoverContent>
-      </Popover>
-    </Stack>
+        )}
+
+        <Wrap spacing={2}>
+          {project.stack.map((tool, i) => (
+            <StackTag label={tool} key={i} />
+          ))}
+        </Wrap>
+
+        <ButtonGroup flexWrap="wrap" gap={2} spacing={0} pt={1}>
+          {project.preview_link && (
+            <Button
+              href={project.preview_link}
+              target="_blank"
+              as="a"
+              rounded="lg"
+              size="sm"
+              rightIcon={<BsPlayFill />}
+            >
+              Preview
+            </Button>
+          )}
+          {/* Only show a link button when the video can't be embedded inline
+              above — otherwise the inline player already covers it. */}
+          {project.video_link && !videoEmbed && (
+            <Button
+              href={project.video_link}
+              target="_blank"
+              as="a"
+              rounded="lg"
+              size="sm"
+              variant="ghost"
+              rightIcon={<BsCameraVideoFill />}
+            >
+              Watch demo
+            </Button>
+          )}
+          {project.source_code_link && (
+            <Button
+              href={project.source_code_link}
+              as="a"
+              target="_blank"
+              rounded="lg"
+              size="sm"
+              variant="ghost"
+              rightIcon={<BsCodeSlash />}
+            >
+              Source Code
+            </Button>
+          )}
+          {project.blog_link && (
+            <Button
+              href={project.blog_link}
+              as="a"
+              target="_blank"
+              rounded="lg"
+              size="sm"
+              variant="ghost"
+              rightIcon={<BsPencilFill />}
+            >
+              Read Post
+            </Button>
+          )}
+        </ButtonGroup>
+      </Stack>
+    </Flex>
   );
 }
 
 export default function Projects() {
   return (
-    <Box>
+    <Box as="section" aria-label="Projects">
       <Title>my work.</Title>
 
-      <SimpleGrid mt={10} columns={1} spacing={5}>
-        {projects.map((project, _i) => (
-          <Project project={project} key={_i} />
+      <Stack mt={10} spacing={{ base: 5, md: 6 }}>
+        {projects.map((project, i) => (
+          <ProjectRow project={project} key={i} />
         ))}
-      </SimpleGrid>
+      </Stack>
     </Box>
   );
 }

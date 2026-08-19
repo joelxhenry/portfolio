@@ -143,6 +143,9 @@ const SideDrawer = () => {
               <NavLink scrollTo="about" event={handleClose}>
                 About
               </NavLink>
+              <NavLink scrollTo="experience" event={handleClose}>
+                Experience
+              </NavLink>
               <NavLink scrollTo="projects" event={handleClose}>
                 Projects
               </NavLink>
@@ -200,6 +203,7 @@ export default function Navigation() {
           spacing={8}
         >
           <NavLink scrollTo="about">About</NavLink>
+          <NavLink scrollTo="experience">Experience</NavLink>
           <NavLink scrollTo="projects">Projects</NavLink>
         </HStack>
 

@@ -12,6 +12,20 @@ export interface ExperienceInterface {
 // resume verbatim — if the resume changes, this file changes.
 const experiences: ExperienceInterface[] = [
   {
+    label: "The Trade Board (GOJ)",
+    company: "The Trade Board Limited — Government of Jamaica",
+    period: "Mar 2023 – Mar 2024",
+    position: "Web Developer",
+    pointers: [
+      `Designed, developed, and deployed a web application from concept to production for the Government of Jamaica's Trade Board, streamlining internal trade and logistics workflows for exporters and MSMEs.`,
+      `Participated in the review of business and system requirements, conferring with Trade Board end users and divisional representatives to clarify system intent, output requirements, and internal checks — then translated those needs into accurate technical solutions.`,
+      `Created UI prototypes in Figma and implemented them in code, delivering an intuitive, high-performance user experience aligned to GOJ stakeholder feedback.`,
+      `Built the platform on Laravel following the MVC architectural pattern and established coding standards, producing a maintainable code base with supporting technical documentation.`,
+      `Performed unit testing and evaluation to ensure requirements were met and errors handled properly, and supported ongoing maintenance, modifications, and enhancements after release.`,
+    ],
+    skills: ["Laravel", "Figma", "Vue", "TailwindCSS", "Requirements Analysis"],
+  },
+  {
     label: "Island Routes",
     company: "Island Routes",
     period: "Nov 2023 – Present",
@@ -25,7 +39,10 @@ const experiences: ExperienceInterface[] = [
       `Integrated third-party systems including the Resmark API, automating bookings, payments, and transactional workflows for the company's digital platforms.`,
       `Built cross-platform mobile applications using React Native and Flutter, ensuring consistent UX and performance across iOS and Android.`,
       `Developed automated test suites (PHPUnit, Pest) and established QA standards adopted across the team, ensuring production readiness before each release.`,
-      `Collaborated with cross-functional stakeholders to gather requirements, translate business goals into technical solutions, provide accurate time and resource estimates, and deliver impactful features.`,
+      `Managed the technical aspects of website development across multiple public-facing sites, building and maintaining a centralized content management system that let non-technical content teams publish and manage media independently.`,
+      `Owned technical SEO across the public-facing sites — structured data (JSON-LD), semantic markup, sitemaps, canonical tags, and Core Web Vitals — driving higher organic search rankings and click-through for the company's tours and destinations.`,
+      `Optimized the sites for the new generation of AI-powered search and LLM agents (Generative Engine Optimization), authoring machine-readable content, llms.txt, and structured metadata so answer engines like ChatGPT, Perplexity, and Google AI Overviews could accurately discover, cite, and surface Island Routes offerings.`,
+      `Collaborated with cross-functional stakeholders to gather requirements, translate business goals into technical solutions, provide accurate time and resource estimates, produce technical documentation, and deliver impactful features.`,
     ],
     skills: [
       "Laravel",
@@ -37,6 +54,9 @@ const experiences: ExperienceInterface[] = [
       "CI/CD",
       "Pest",
       "PHPUnit",
+      "SEO",
+      "GEO / AEO",
+      "Structured Data",
     ],
   },
   {
@@ -53,18 +73,6 @@ const experiences: ExperienceInterface[] = [
       `Improved developer productivity by documenting API error reporting and removing obsolete dependencies, cutting debugging time by 80%.`,
     ],
     skills: [".NET", "Yii", "SQL", "Codeception"],
-  },
-  {
-    label: "The Trade Board",
-    company: "The Trade Board Limited",
-    period: "Mar 2023 – Mar 2024",
-    position: "Web Developer",
-    pointers: [
-      `Designed and developed a web application from concept to deployment, streamlining internal trade and logistics workflows for the Government of Jamaica's Trade Board.`,
-      `Created UI prototypes in Figma and implemented them in code to deliver an intuitive user experience for exporters and MSMEs.`,
-      `Built the platform on Laravel following the MVC architectural pattern, translating Jamaica Trade Board business requirements into working software.`,
-    ],
-    skills: ["Laravel", "Figma", "Vue", "TailwindCSS"],
   },
 ];
 

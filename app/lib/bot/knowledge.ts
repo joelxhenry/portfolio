@@ -5,12 +5,12 @@ import skills from '@/app/content/skills';
 import blogs from '@/app/content/blogs';
 
 /**
- * Flattens the portfolio content files into a single markdown document that
- * the voice-box bot uses as grounding context (see .plans/bot.md, Phase 1).
+ * Flattens the portfolio content files into a single markdown document.
+ * Served verbatim at /llms.txt (see app/llms.txt/route.ts) so LLMs and AI
+ * agents can read a machine-friendly summary of Joel in one request.
  *
- * The full corpus is under ~10k tokens so we pass the whole thing to Gemini
- * on every turn — no embeddings, no retrieval layer. Keep this function pure
- * and deterministic so callers can memoize the result per process.
+ * Keep this function pure and deterministic so callers can memoize the
+ * result per process.
  */
 export function buildKnowledgeBase(): string {
   return [
@@ -41,17 +41,16 @@ function buildEducationSection(): string {
 }
 
 function buildContactSection(): string {
-  // Contact details Joel has already put on his public resume. The bot is
-  // still instructed via the system prompt (see app/lib/bot/prompt.ts) not
-  // to volunteer personal details beyond the public portfolio, but having
-  // the canonical location + site makes "where is Joel based?" answerable.
+  // Contact details Joel has already put on his public resume, so they're
+  // safe to expose in the /llms.txt corpus. The canonical location + site
+  // make "where is Joel based?" answerable for any assistant reading this.
   const { location, website } = aboutContent.contact;
   return [
     '## Contact & Location',
     '',
     `- Location: ${location}`,
     `- Portfolio: ${website}`,
-    '- For direct contact, always point visitors at the contact form on this site.',
+    '- For direct contact, use the contact form on this site.',
   ].join('\n');
 }
 

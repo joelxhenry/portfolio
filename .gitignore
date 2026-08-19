@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal / working files — notes and scripts that aren't part of the
+# deployed app (e.g. the Harmon demo video script)
+/docs/
+
+# Claude Code local files
+/.claude/

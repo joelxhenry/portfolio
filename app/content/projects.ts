@@ -9,6 +9,12 @@ export interface ProjectInterface {
   preview_link?: string;
   source_code_link?: string;
   blog_link?: string;
+  /**
+   * Optional demo video. Accepts a YouTube or Loom share URL (rendered as an
+   * inline responsive player) or any other URL (rendered as a "Watch demo"
+   * link button). See app/sections/projects.tsx.
+   */
+  video_link?: string;
   stack: string[];
 }
 
@@ -22,13 +28,16 @@ const projects: ProjectInterface[] = [
     stack: ["AI", "TypeScript", "Next.js"],
   },
   {
-    title: "The Export Academy",
-    description: `
-    EXPORTAcademy is a powerful launchpad! It equips our exporters and MSMEs with the tools, knowledge, and confidence to thrive in the global marketplace.`,
-    image:
-      "https://png.pngtree.com/thumb_back/fh260/background/20200220/pngtree-container-port-terminal-design-for-export-container-trucks-working-image_330191.jpg",
-    preview_link: "https://exportacademyja.com/",
-    stack: ["Laravel", "Typescript", "Vue3", "TailwindCSS"],
+    title: "Harmon Commerce",
+    description: `Shopify for emerging markets — a white-label commerce platform where any merchant can sign up and, in minutes, get a fully isolated, production-ready store of their own. Under the hood it's a single shared Vendure engine serving every tenant, with automated provisioning, per-tenant data isolation, and a Next.js 16 + Payload CMS storefront. Merchants run their entire business through the Harmon Dashboard and never know the engine exists. Architected and built end to end: multi-tenancy, billing, the API gateway, and the design system.
+
+    Live storefront demo: demo.harmonstore.online — email: demo@zeenconnect.com · password: demoP@ssw0rd`,
+    image: "/harmon-logo.png",
+    preview_link: "https://harmoncommerce.com/",
+    // Paste your YouTube or Loom share URL here once the demo is recorded —
+    // it renders as an inline player on the card automatically.
+    // video_link: "https://www.youtube.com/watch?v=XXXXXXXXXXX",
+    stack: ["Vendure", "TypeScript", "Next.js", "Payload CMS", "GraphQL", "TailwindCSS"],
   },
   {
     title: "Island Routes Website",
