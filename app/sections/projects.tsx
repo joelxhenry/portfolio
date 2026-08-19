@@ -11,6 +11,7 @@ import {
   ButtonGroup,
   Stack,
   HStack,
+  StackDivider,
 } from "@chakra-ui/react";
 import projects, { ProjectInterface } from "../content/projects";
 import ColorScheme from "../assets/colors";
@@ -64,10 +65,6 @@ function StackTag({ label }: { label: string }) {
 }
 
 function ProjectCard({ project }: { project: ProjectInterface }) {
-  const cardBg = useColorModeValue(
-    ColorScheme.light.cardBg,
-    ColorScheme.dark.cardBg
-  );
   const cardBorder = useColorModeValue(
     ColorScheme.light.cardBorder,
     ColorScheme.dark.cardBorder
@@ -88,17 +85,7 @@ function ProjectCard({ project }: { project: ProjectInterface }) {
   const videoEmbed = project.video_link ? toEmbedUrl(project.video_link) : null;
 
   return (
-    <Stack
-      as="article"
-      bg={cardBg}
-      border="1px solid"
-      borderColor={cardBorder}
-      borderRadius="2xl"
-      p={{ base: 5, md: 6 }}
-      spacing={4}
-      transition="ease .25s"
-      _hover={{ borderColor: primary }}
-    >
+    <Stack as="article" spacing={4}>
       {/* Header — fixed-size brand mark beside the project name. White backdrop
           keeps a dark logo legible in both themes; contain never distorts it. */}
       <HStack spacing={3} align="center">
@@ -122,17 +109,18 @@ function ProjectCard({ project }: { project: ProjectInterface }) {
             objectFit="contain"
           />
         </Box>
-        <Heading fontSize={{ base: "lg", md: "xl" }} color={primary}>
+        <Heading fontSize={{ base: "xl", md: "2xl" }} color={primary}>
           {project.title}
         </Heading>
       </HStack>
 
-      <Stack spacing={2}>
+      <Stack spacing={2} maxW="680px">
         {paragraphs.map((block, i) => (
           <Text
             key={i}
             fontFamily={FontScheme.body}
-            fontSize={"15px"}
+            fontSize={{ base: "sm", md: "15px" }}
+            lineHeight={1.7}
             opacity={i === 0 ? 0.85 : 0.6}
           >
             {block}
@@ -235,11 +223,20 @@ function ProjectCard({ project }: { project: ProjectInterface }) {
 }
 
 export default function Projects() {
+  const dividerColor = useColorModeValue(
+    ColorScheme.light.cardBorder,
+    ColorScheme.dark.cardBorder
+  );
+
   return (
     <Box as="section" aria-label="Projects">
       <Title>my work.</Title>
 
-      <Stack mt={10} spacing={{ base: 5, md: 6 }}>
+      <Stack
+        mt={10}
+        spacing={{ base: 10, md: 14 }}
+        divider={<StackDivider borderColor={dividerColor} />}
+      >
         {projects.map((project, i) => (
           <ProjectCard project={project} key={i} />
         ))}

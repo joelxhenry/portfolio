@@ -54,7 +54,7 @@ function ExperiencePanel({
   data: { position, company, period, pointers, skills },
 }: ExperiencePanelProps) {
   return (
-    <TabPanel>
+    <TabPanel px={{ base: 0, md: 4 }}>
       <Box data-group>
         <Flex alignItems={"center"} gap={1}>
           <Heading fontSize={"md"}>
@@ -89,18 +89,20 @@ function ExperiencePanel({
           {period}
         </Text>
 
-        <Flex mt={5} gap={2}>
+        <Flex mt={5} gap={2} flexWrap={"wrap"}>
           {skills.map((skill, index) => (
             <Skill skill={skill} key={index} />
           ))}
         </Flex>
 
-        <List py={5} spacing={10}>
+        <List py={5} spacing={{ base: 5, md: 10 }}>
           {pointers.map((point, index) => (
             <ListItem key={index}>
               <Stack direction={"row"}>
                 <ListIcon mt={1} as={ArrowForwardIcon} />
-                <Text opacity={0.7}>{point}</Text>
+                <Text opacity={0.7} fontSize={{ base: "sm", md: "md" }}>
+                  {point}
+                </Text>
               </Stack>
             </ListItem>
           ))}
@@ -113,12 +115,13 @@ function ExperiencePanel({
 function ExperienceTab({ children }: ExperienceTabProps) {
   return (
     <Tab
-      px={2}
+      px={{ base: 2, md: 3 }}
+      py={{ base: 2, md: 3 }}
       justifyContent={"start"}
       whiteSpace={"nowrap"}
       textAlign={"left"}
       fontWeight={"semibold"}
-      fontSize={"sm"}
+      fontSize={{ base: "xs", md: "sm" }}
     >
       {children}
     </Tab>
@@ -129,13 +132,22 @@ export default function Experience() {
   return (
     <Box>
       <Title>my experience.</Title>
-      <Box py={10}>
+      <Box py={{ base: 6, md: 10 }}>
         <Tabs
           colorScheme={useColorModeValue("blackAlpha", "whiteAlpha")}
-          px={{ base: 0, md: 10 }}
+          px={{ base: 0, md: 6 }}
           orientation={"horizontal"}
         >
-          <TabList>
+          <TabList
+            overflowX={"auto"}
+            overflowY={"hidden"}
+            sx={{
+              // Let the tabs scroll sideways on narrow screens instead of
+              // squishing, and hide the scrollbar so it stays clean.
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            }}
+          >
             {experiences.map(({ label }, index) => (
               <ExperienceTab key={index}>{label}</ExperienceTab>
             ))}
