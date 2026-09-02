@@ -40,6 +40,14 @@ const projects: ProjectInterface[] = [
     stack: ["Vendure", "TypeScript", "Next.js", "Payload CMS", "GraphQL", "TailwindCSS"],
   },
   {
+    title: "Export Academy",
+    description: `An e-learning and export-readiness platform that trains and certifies exporters — course content and a resource library, multi-format assessments with per-user progress tracking, and an admin dashboard with reporting. Built on Laravel + Inertia.js, I also led its migration from Vue 3 + PrimeVue to a modern React 19 + shadcn/ui front end, porting the full page and component surface without touching the PHP backend.`,
+    image: "/export-academy-logo.png",
+    preview_link: "https://ea-app.zncn.app",
+    source_code_link: "https://github.com/Export-Academy/www.export-academy.com",
+    stack: ["Laravel", "Inertia.js", "React", "TypeScript", "TailwindCSS"],
+  },
+  {
     title: "Island Routes Website",
     description: `
     Developed and maintained a centralized content management system for multiple websites,
